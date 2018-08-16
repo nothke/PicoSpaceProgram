@@ -1,7 +1,7 @@
 -- pico space program
 -- by nothke
 
-doground = false
+doground = true
 groundy = 120
 
 cam = {}
@@ -30,7 +30,7 @@ lines_bell = {
 }
 
 dt = 1/30
-gravity = 0 --0.1
+gravity = 0.1
 
 particlespeedmult = 5
 
@@ -42,16 +42,19 @@ function _init()
  part = initpart()
  part.lines = lines_bell
  part.isthruster = true
- addpart(craft, part, {x = 0, y = 0})
+ addpart(craft, part, {x = 0, y = -12})
 
- --[[
  part = initpart()
  part.lines = lines_tank
- addpart(craft, part, {x = 0, y = 0})
+ addpart(craft, part, {x = 0, y = -4})
+
+  part = initpart()
+ part.lines = lines_tank
+ addpart(craft, part, {x = 0, y = 4})
 
  part = initpart()
- part3.lines = lines_pod
- addpart(craft, part, {x = 0, y = 0})]]
+ part.lines = lines_pod
+ addpart(craft, part, {x = 0, y = 12})
 
  focuscraft = craft
 end
@@ -175,7 +178,7 @@ function _update()
 
    if part.isthruster then
     if in_thrt > 0 then
-     ppos = {x = craft.x, y = craft.y }
+     ppos = localtoworldpartpos(craft, part, {x = 0, y = 0})
      pvel = {
      x = craft.v.x - craft.f.x * particlespeedmult, 
      y = craft.v.y - craft.f.y * particlespeedmult}
@@ -193,8 +196,16 @@ function _update()
  cam.y = focuscraft.y - 64
  cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
 
- cam.x = 0
- cam.y = 0
+ --cam.x = 0
+ --cam.y = 0
+end
+
+function localtoworldpartpos(craft, part, lpos)
+ l = { 
+  x = part.x + lpos.x,
+  y = part.y + lpos.y }
+
+ return localtoworldpos(craft, l)
 end
 
 function localtoworldpos(transform, lpos)
