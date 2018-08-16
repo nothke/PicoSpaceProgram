@@ -28,13 +28,13 @@ function initpart()
  _right.y = cos(0.375)
 
  part = { 
-  x = 64, 
-  y = 64, 
-  v = {x = 0, y = 0},
-  f = _forward,
-  r = _right, 
-  a = 0,
-  com = {x = 0, y = 0} }
+  x = 64, -- position x
+  y = 64, -- position y
+  v = {x = 0, y = 0}, -- velocity
+  f = _forward, -- forward vector
+  r = _right, -- right vector
+  a = 0, -- angle
+  com = {x = 0, y = 0} } -- center of mass
  return part
 end
 
@@ -130,6 +130,9 @@ function _draw()
 
  cam.x = focuspart.x - 64
  cam.y = focuspart.y - 64
+
+ -- ground
+ line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
 
  camera(cam.x,cam.y)
 end
