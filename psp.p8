@@ -77,18 +77,21 @@ function _update()
   parts[i].v.x += parts[i].f.x * in_thrt * 0.2
   parts[i].v.y += parts[i].f.y * in_thrt * 0.2
 
+  collided = part.y > groundy - 2
+  boomvelocity = part.v.y > 3
 
   -- ground collision
-  if part.y > groundy - 2 then
-   if part.v.y > 3 then
+  if collided then
+   if boomvelocity then
     del(parts, part)
     boom(pos)
-
     goto outaloop
    end
 
    parts[i].v.y = 0
    parts[i].v.y = -gravity
+   parts[i].v.x *= 0.9 -- friction
+
    parts[i].y = groundy - 2
   end
 
