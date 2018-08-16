@@ -13,6 +13,9 @@ dt = 1/30
 gravity = 0 --0.1
 
 function _init()
+ poke(0x5f2d, 1)
+
+
  part = initpart()
  add(parts, part)
 
@@ -126,6 +129,9 @@ function _update()
  cam.x = focuspart.x - 64
  cam.y = focuspart.y - 64
  cam.v = { x = focuspart.v.x, y = focuspart.v.y }
+
+ cam.x = 0
+ cam.y = 0
 end
 
 function localtoworldpos(part, lpos)
@@ -161,6 +167,10 @@ function boom(pos)
  addparticle(engineparticles, 100, pos, v, 6, 10, 20)
 end
 
+lastclicked = false
+lclickstartpos = {}
+prevmouse = {}
+
 function _draw()
  cls()
 
@@ -182,13 +192,32 @@ function _draw()
  vray({x = focuspart.x, y = focuspart.y}, focuspart.v, 5, 10)
 
  -- temp
- if in_x then
+
+ -- mouse
+ mouse = {x = stat(32), y = stat(33)}
+ wmouse = {x = cam.x + mouse.x, y = cam.y + mouse.y}
+ click = stat(34) == 1
+
+ spr(0,wmouse.x - 4,wmouse.y - 4)
+ --pset(mousex, mousey, 10)
+
+ if click then
+
   --fpos = { x = focuspart.x + 7, y = focuspart.y }
   fpos = { x = 7, y = 3 }
-  fpos = localtoworldpos(focuspart, fpos)
-  fdir = { x = 0.001, y = -0.002 }
+  --fpos = localtoworldpos(focuspart, fpos)
+  fpos = wmouse
+
+  --fdir = { x = 0.001, y = -0.002 }
+  fdir = {
+   x = -(prevmouse.x - wmouse.x) * 0.001, 
+   y = -(prevmouse.y - wmouse.y) * 0.001 }
+
   addforce(focuspart, fpos, fdir)
  end
+
+ prevmouse = {x = wmouse.x, y = wmouse.y}
+ lastclicked = click
 end
 
 function drawpart(part)
