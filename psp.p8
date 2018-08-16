@@ -1,53 +1,16 @@
--- psp
+-- pico space program
 -- by nothke
-
-x=64 y=64
-lowrezmode = false
-
-function rspr(sx,sy,x,y,a,w)
- local ca,sa=cos(a),sin(a)
- local srcx,srcy,addr,pixel_pair
- local ddx0,ddy0=ca,sa
- local mask=shl(0xfff8,(w-1))
- w*=4
- ca*=w-0.5
- sa*=w-0.5
- local dx0,dy0=sa-ca+w,-ca-sa+w
- w=2*w-1
- for ix=0,w do
-  srcx,srcy=dx0,dy0
-  for iy=0,w do
-   if band(bor(srcx,srcy),mask)==0 then
-    local c=sget(sx+srcx,sy+srcy)
-    sset(x+ix,y+iy,c)
-   else
-    sset(x+ix,y+iy,rspr_clear_col)
-   end
-   srcx-=ddy0
-   srcy+=ddx0
-  end
-  dx0+=ddx0
-  dy0+=ddy0
- end
-end
-
---skidmarks = {}
-engineparticles = {}
 
 groundy = 120
 
+cam = {}
+parts = {}
+engineparticles = {}
+
+dt = 1/30
+gravity = 0.1
+
 function _init()
- if lowrezmode then poke(0x5f2c,3) end
- cls()
-
- --velocam.x = 0
- --velocam.y = 0
-
- --skidmarks.fl = { points = {} }
- --skidmarks.fr = { points = {} }
- --skidmarks.rl = { points = {} }
- --skidmarks.rr = { points = {} }
-
  part = initpart()
  add(parts, part)
 end
@@ -71,13 +34,6 @@ function initpart()
   com = {x = 0, y = 0} }
  return part
 end
-
-dt = 1/60
-
-cam = {}
-parts = {}
-
-gravity = 0.1
 
 -- inputs
 in_thrt = 0
@@ -363,6 +319,34 @@ function clamp(min, max, value)
  if (value > max) value = max
 
  return value
+end
+
+-- sprite rotation
+function rspr(sx,sy,x,y,a,w)
+ local ca,sa=cos(a),sin(a)
+ local srcx,srcy,addr,pixel_pair
+ local ddx0,ddy0=ca,sa
+ local mask=shl(0xfff8,(w-1))
+ w*=4
+ ca*=w-0.5
+ sa*=w-0.5
+ local dx0,dy0=sa-ca+w,-ca-sa+w
+ w=2*w-1
+ for ix=0,w do
+  srcx,srcy=dx0,dy0
+  for iy=0,w do
+   if band(bor(srcx,srcy),mask)==0 then
+    local c=sget(sx+srcx,sy+srcy)
+    sset(x+ix,y+iy,c)
+   else
+    sset(x+ix,y+iy,rspr_clear_col)
+   end
+   srcx-=ddy0
+   srcy+=ddx0
+  end
+  dx0+=ddx0
+  dy0+=ddy0
+ end
 end
 
 -- print with shadow
