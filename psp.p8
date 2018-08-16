@@ -120,6 +120,20 @@ function _update()
  updateparticlesystem(engineparticles)
 end
 
+-- adds force at position calculating torque
+function addforce(part, pos, fdir)
+ diff = { x = pos.x - port.x, y = pos.y - part.y }
+ r = length(diff)
+ normalize(diff)
+
+ directforce = dot(diff, fdir)
+ radialforce = dot(right(diff), fdir)
+ 
+ -- t = f * r 
+ part.av += radialforce * r
+ part.v += directforce * diff
+end
+
 function boom(pos)
  v = { x =0, y = -3 }
  addparticle(engineparticles, 100, pos, v, 6, 10, 20)
@@ -314,6 +328,11 @@ end
 
 function length(v)
  return sqrt(v.x*v.x + v.y*v.y)
+end
+
+function right(v)
+ nv = { x = v.y, y=-v.x }
+ return nv
 end
 
 function vpset(v, col)
