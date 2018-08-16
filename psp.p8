@@ -302,6 +302,13 @@ function _draw()
 
  prevmouse = {x = wmouse.x, y = wmouse.y}
  lastclicked = click
+
+ -- ui
+ h = flr(-(focuscraft.y - groundy))
+ hstr = ""..h
+ txtx = 64+15-#hstr*4
+ rectfill(cam.x+64-14,cam.y,cam.x+64+14,cam.y+10,6)
+ print(h, cam.x+txtx, cam.y+1, 5)
 end
 
 function drawcraft(craft)
