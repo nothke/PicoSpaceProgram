@@ -322,9 +322,10 @@ end
 
 function normalize(v)
  l = length(v)
- v.x = v.x/l
- v.y = v.y/l
- return v
+ nv = {
+  x = v.x/l,
+  y = v.y/l }
+ return nv
 end
 
 function dot(v1, v2)
