@@ -5,6 +5,7 @@ groundy = 120
 
 cam = {}
 parts = {}
+focuspart = {}
 engineparticles = {}
 
 dt = 1/30
@@ -13,6 +14,8 @@ gravity = 0.1
 function _init()
  part = initpart()
  add(parts, part)
+
+ focuspart = part
 end
 
 function initpart()
@@ -73,10 +76,7 @@ function _update()
 
   parts[i].v.x += parts[i].f.x * in_thrt * 0.2
   parts[i].v.y += parts[i].f.y * in_thrt * 0.2
-  --parts[i].v.y -= in_thrt * 0.2
 
-  cam.x = 0
-  cam.y = 0
 
   -- ground collision
   if part.y > groundy - 2 then
@@ -124,6 +124,11 @@ function _draw()
   drawpart(parts[i])
   --print(parts[i].v.y, 10, 10, 10)
  end
+
+ cam.x = focuspart.x - 64
+ cam.y = focuspart.y - 64
+
+ camera(cam.x,cam.y)
 end
 
 function drawpart(part)
@@ -160,8 +165,6 @@ function drawpart(part)
   y = part.y + part.r.y * 10 }
  vline(pos, forward, 12)
  vline(pos, right, 8)
-
- --rectfill(x0,y0,x1,y1,7)
 end
 
 -- particles
@@ -219,8 +222,6 @@ function updateparticlesystem(ps)
 
     particle.pos.x += particle.velocity.x
     particle.pos.y += particle.velocity.y
-
-
 
     particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
 
