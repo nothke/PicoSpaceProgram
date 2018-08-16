@@ -130,6 +130,7 @@ function _draw()
 
  cam.x = focuspart.x - 64
  cam.y = focuspart.y - 64
+ cam.v = { x = focuspart.v.x, y = focuspart.v.y }
 
  -- ground
  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
@@ -226,8 +227,8 @@ function updateparticlesystem(ps)
     particle.lastpos.x = particle.pos.x
     particle.lastpos.y = particle.pos.y
 
-    particle.pos.x += particle.velocity.x
-    particle.pos.y += particle.velocity.y
+    particle.pos.x += particle.velocity.x - cam.v.x
+    particle.pos.y += particle.velocity.y - cam.v.y
 
     particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
 
