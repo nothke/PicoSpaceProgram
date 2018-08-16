@@ -125,18 +125,19 @@ end
 function addforce(part, pos, fdir)
  diff = { x = pos.x - part.x, y = pos.y - part.y }
  r = length(diff)
- normalize(diff)
+ ndiff = normalize(diff)
 
- directforce = dot(diff, fdir)
- radialforce = dot(right(diff), fdir)
+ directforce = dot(ndiff, fdir)
+ radialforce = dot(right(ndiff), fdir)
  
  -- t = f * r 
  part.av += radialforce * r
- part.v.x += directforce * diff.x
- part.v.y += directforce * diff.y
+ part.v.x += directforce * ndiff.x
+ part.v.y += directforce * ndiff.y
 
  -- debug
- vray(pos, diff, 10, 10)
+ vray(pos, fdir, 10, 10)
+ vray(pos, diff, 1, 3)
 end
 
 function boom(pos)
@@ -163,6 +164,11 @@ function _draw()
  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
 
  camera(cam.x,cam.y)
+
+ -- temp
+ fpos = { x = focuspart.x + 5, y = focuspart.y }
+ fdir = { x = 0, y = 0.1 }
+ addforce(focuspart, fpos, fdir)
 end
 
 function drawpart(part)
