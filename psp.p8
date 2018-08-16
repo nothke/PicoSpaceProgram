@@ -118,11 +118,12 @@ function _update()
  end
 
  updateparticlesystem(engineparticles)
+
 end
 
 -- adds force at position calculating torque
 function addforce(part, pos, fdir)
- diff = { x = pos.x - port.x, y = pos.y - part.y }
+ diff = { x = pos.x - part.x, y = pos.y - part.y }
  r = length(diff)
  normalize(diff)
 
@@ -131,7 +132,11 @@ function addforce(part, pos, fdir)
  
  -- t = f * r 
  part.av += radialforce * r
- part.v += directforce * diff
+ part.v.x += directforce * diff.x
+ part.v.y += directforce * diff.y
+
+ -- debug
+ vray(pos, diff, 10, 10)
 end
 
 function boom(pos)
@@ -186,14 +191,14 @@ function drawpart(part)
  vline(v4, v1, col)
 
  pos = { x = part.x, y = part.y }
- forward = { 
+ _forward = { 
   x = part.x + part.f.x * 10, 
   y = part.y + part.f.y * 10 }
- right = { 
+ _right = { 
   x = part.x + part.r.x * 10, 
   y = part.y + part.r.y * 10 }
- vline(pos, forward, 12)
- vline(pos, right, 8)
+ vline(pos, _forward, 12)
+ vline(pos, _right, 8)
 end
 
 -- particles
@@ -341,6 +346,13 @@ end
 
 function vline(v0, v1, col)
  line(v0.x,v0.y,v1.x,v1.y,col)
+end
+
+function vray(v0, v1, scale, col)
+ line(v0.x,v0.y,
+  v0.x + v1.x * scale,
+  v0.y + v1.y * scale,
+  col)
 end
 
 -- math helpers
