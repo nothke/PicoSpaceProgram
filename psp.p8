@@ -157,7 +157,7 @@ function addforce(part, pos, fdir)
  ndiff = normalize(diff)
 
  directforce = dot(ndiff, fdir)
- radialforce = dot(right(ndiff), fdir)
+ radialforce = dot(right(ndiff), fdir) * 0.5
  
  -- t = f * r 
  part.av += radialforce * r
@@ -208,24 +208,22 @@ function _draw()
  spr(0,wmouse.x - 4,wmouse.y - 4)
  --pset(mousex, mousey, 10)
 
- lpos = worldtolocalpos(focuspart, wmouse)
- print(lpos.x)
- print(lpos.y)
-
  if click then
-
+  if not lastclicked then
+   lclickstartpos = worldtolocalpos(focuspart, wmouse)
+  end
 
 
 
   --fpos = { x = focuspart.x + 7, y = focuspart.y }
   fpos = { x = 7, y = 3 }
   --fpos = localtoworldpos(focuspart, fpos)
-  fpos = wmouse
+  fpos = localtoworldpos(focuspart, lclickstartpos)
 
   --fdir = { x = 0.001, y = -0.002 }
   fdir = {
-   x = -(prevmouse.x - wmouse.x) * 0.001, 
-   y = -(prevmouse.y - wmouse.y) * 0.001 }
+   x = -(fpos.x - wmouse.x) * 0.0001, 
+   y = -(fpos.y - wmouse.y) * 0.0001 }
 
   addforce(focuspart, fpos, fdir)
  end
