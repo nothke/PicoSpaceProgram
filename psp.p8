@@ -9,6 +9,26 @@ parts = {}
 focuspart = {}
 engineparticles = {}
 
+lines_pod = {
+ {x=-4, y=-4}, {x= 0, y= 4},
+ {x= 0, y= 4}, {x= 4, y=-4},
+ {x= 4, y=-4}, {x=-4, y=-4},
+}
+
+lines_tank = {
+ {x=-4, y=-4}, {x=-4, y= 4},
+ {x=-4, y= 4}, {x= 4, y= 4},
+ {x= 4, y= 4}, {x= 4, y=-4},
+ {x= 4, y=-4}, {x=-4, y=-4},
+}
+
+lines_bell = {
+ {x=-3, y=-4}, {x= 4, y= 4},
+ {x= 4, y= 4}, {x=-4, y= 4},
+ {x=-4, y= 4}, {x= 3, y=-4},
+ {x= 3, y=-4}, {x=-3, y=-4},
+}
+
 dt = 1/30
 gravity = 0 --0.1
 
@@ -17,6 +37,17 @@ function _init()
 
 
  part = initpart()
+ part.lines = lines_bell
+ add(parts, part)
+
+ part2 = initpart()
+ part2.y -= 8
+ part2.lines = lines_tank
+ add(parts, part)
+
+ part3 = initpart()
+ part3.y -= 16
+ part3.lines = lines_pod
  add(parts, part)
 
  focuspart = part
@@ -32,6 +63,7 @@ function initpart()
  _right.y = cos(0.375)
 
  part = { 
+  lines = lines_tank,
   x = 64, -- position x
   y = 118, -- position y
   v = {x = 0, y = 0}, -- velocity
@@ -64,7 +96,7 @@ function _update()
  -- physics
 
  -- temporary, just to make controlling easier
- propoangulardrag = 0.9
+ propoangulardrag = 1
 
  for i=1,#parts,1 do
   part = parts[i]
@@ -233,30 +265,17 @@ function _draw()
 end
 
 function drawpart(part)
- carwdt = 8
-
- v1 = {}
- v1.x = part.x + sin(part.a) * carwdt
- v1.y = part.y + cos(part.a) * carwdt
-
- v2 = {}
- v2.x = part.x + sin(part.a + 0.25) * carwdt
- v2.y = part.y + cos(part.a + 0.25) * carwdt
-
- v3 = {}
- v3.x = part.x + sin(part.a + 0.5) * carwdt
- v3.y = part.y + cos(part.a + 0.5) * carwdt
-
- v4 = {}
- v4.x = part.x + sin(part.a + 0.75) * carwdt
- v4.y = part.y + cos(part.a + 0.75) * carwdt
 
  col = 7
- vline(v1, v2, col)
- vline(v2, v3, col)
- vline(v3, v4, col)
- vline(v4, v1, col)
 
+ for i=1,#part.lines,2 do
+  v0 = localtoworldpos(part, part.lines[i])
+  v1 = localtoworldpos(part, part.lines[i+1])
+
+  vline(v0, v1, col)
+ end
+
+ --[[
  pos = { x = part.x, y = part.y }
  _forward = { 
   x = part.x + part.f.x * 10, 
@@ -266,6 +285,7 @@ function drawpart(part)
   y = part.y + part.r.y * 10 }
  vline(pos, _forward, 12)
  vline(pos, _right, 8)
+ ]]
 end
 
 -- particles
