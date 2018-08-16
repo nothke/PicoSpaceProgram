@@ -1,14 +1,19 @@
 -- pico space program
 -- by nothke
 
+-- settings:
+-- - physics
 doground = true
 groundy = 120
 
-cam = {}
-crafts = {}
-focuscraft = {}
-engineparticles = {}
+gravity = 0.05
+propoangulardrag = 0.1
 
+-- - graphical
+particlespeedmult = 5
+
+
+-- part graphics
 lines_pod = {
  {x=-4, y=-4}, {x= 0, y= 4},
  {x= 0, y= 4}, {x= 4, y=-4},
@@ -29,31 +34,63 @@ lines_bell = {
  {x= 3, y=-4}, {x=-3, y=-4},
 }
 
-dt = 1/30
-gravity = 0.1
+lines_rcs = {
+ {x=-1, y=-1}, {x= 1, y= 1},
+ {x= 1, y= 1}, {x=-1, y= 1},
+ {x=-1, y= 1}, {x= 1, y=-1},
+ {x= 1, y=-1}, {x=-1, y=-1},
+}
 
-particlespeedmult = 5
+-- part data
+part_standard_tank = {
+ name = "fuel tank",
+ lines = lines_tank,
+ fuel = 10,
+}
+
+part_engine = {
+ name = "rocket engine",
+ lines = lines_bell,
+ isthruster = true,
+ force = 1
+}
+
+part_pod = {
+ name = "crew pod",
+ lines = lines_pod
+}
+
+part_rcs = {
+ name = "rcs thruster",
+ lines = lines_rcs
+}
+
+-- dont change
+dt = 1/30 -- deltatime
+
+cam = {}
+crafts = {}
+focuscraft = {}
+engineparticles = {}
 
 function _init()
  poke(0x5f2d, 1)
 
  craft = initcraft()
 
- part = initpart()
- part.lines = lines_bell
- part.isthruster = true
+ part = newpart(part_engine)
  addpart(craft, part, {x = 0, y = -12})
 
- part = initpart()
- part.lines = lines_tank
+ part = newpart(part_standard_tank)
  addpart(craft, part, {x = 0, y = -4})
 
-  part = initpart()
- part.lines = lines_tank
+ part = newpart(part_standard_tank)
  addpart(craft, part, {x = 0, y = 4})
 
- part = initpart()
- part.lines = lines_pod
+ part = newpart(part_engine)
+ addpart(craft, part, {x = 8, y = 4})
+
+ part = newpart(part_pod)
  addpart(craft, part, {x = 0, y = 12})
 
  focuscraft = craft
@@ -87,6 +124,15 @@ function addpart(craft, part, lpos)
  add(craft.parts, part)
  part.x = lpos.x
  part.y = lpos.y
+end
+
+function newpart(pt)
+ part = initpart()
+
+ part.lines = pt.lines
+ if (pt.isthruster ~= nil) part.isthruster = pt.isthruster
+ if (pt.fuel ~= nil ) part.fuel = pt.fuel
+ return part
 end
 
 function initpart()
@@ -124,10 +170,6 @@ function _update()
  in_x = btn(4)
 
  -- physics
-
- -- temporary, just to make controlling easier
- propoangulardrag = 1
-
  for i=1,#crafts,1 do
   craft = crafts[i]
 
@@ -152,7 +194,7 @@ function _update()
 
   -- step angular velocity
   craft.a += craft.av
-  craft.av *= propoangulardrag
+  craft.av *= 1 - propoangulardrag
 
   collided = craft.y > groundy - 2
   boomvelocity = craft.v.y > 3
@@ -182,7 +224,7 @@ function _update()
      pvel = {
      x = craft.v.x - craft.f.x * particlespeedmult, 
      y = craft.v.y - craft.f.y * particlespeedmult}
-     addparticle(engineparticles, 4, ppos, pvel, 1, 10, 20)
+     addparticle(engineparticles, 10, ppos, pvel, 3, 10, 20)
     end
    end
   end
