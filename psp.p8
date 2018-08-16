@@ -143,6 +143,13 @@ function localtoworldpos(part, lpos)
  return lpos
 end
 
+function worldtolocalpos(part, pos)
+ local diff = { x = part.x - pos.x, y = part.y - pos.y }
+ local _x = -dot(diff, part.r)
+ local _y = -dot(diff, part.f)
+ return {x = _x, y = _y}
+end
+
 -- adds force at position calculating torque
 function addforce(part, pos, fdir)
  diff = { x = part.x - pos.x, y = part.y - pos.y }
@@ -201,7 +208,14 @@ function _draw()
  spr(0,wmouse.x - 4,wmouse.y - 4)
  --pset(mousex, mousey, 10)
 
+ lpos = worldtolocalpos(focuspart, wmouse)
+ print(lpos.x)
+ print(lpos.y)
+
  if click then
+
+
+
 
   --fpos = { x = focuspart.x + 7, y = focuspart.y }
   fpos = { x = 7, y = 3 }
