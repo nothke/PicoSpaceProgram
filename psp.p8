@@ -29,11 +29,11 @@ function initpart()
 
  part = { 
   x = 64, -- position x
-  y = 64, -- position y
+  y = 118, -- position y
   v = {x = 0, y = 0}, -- velocity
   f = _forward, -- forward vector
   r = _right, -- right vector
-  a = 0, -- angle
+  a = 0.375, -- angle
   av = 0, -- angular velocity
   com = {x = 0, y = 0} } -- center of mass
  return part
