@@ -34,6 +34,7 @@ function initpart()
   f = _forward, -- forward vector
   r = _right, -- right vector
   a = 0, -- angle
+  av = 0, -- angular velocity
   com = {x = 0, y = 0} } -- center of mass
  return part
 end
@@ -55,10 +56,13 @@ function _update()
 
  -- physics
 
+ -- temporary, just to make controlling easier
+ propoangulardrag = 0.9
+
  for i=1,#parts,1 do
   part = parts[i]
 
-  parts[i].a += in_rot * 0.03
+  parts[i].av += in_rot * 0.003
   a = parts[i].a
   
   parts[i].f.x = sin(a + 0.125)
@@ -76,6 +80,10 @@ function _update()
 
   parts[i].v.x += parts[i].f.x * in_thrt * 0.2
   parts[i].v.y += parts[i].f.y * in_thrt * 0.2
+
+  -- step angular velocity
+  parts[i].a += parts[i].av
+  parts[i].av *= propoangulardrag
 
   collided = part.y > groundy - 2
   boomvelocity = part.v.y > 3
