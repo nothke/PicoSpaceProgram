@@ -9,7 +9,7 @@ focuspart = {}
 engineparticles = {}
 
 dt = 1/30
-gravity = 0.1
+gravity = 0 --0.1
 
 function _init()
  part = initpart()
@@ -119,6 +119,9 @@ function _update()
 
  updateparticlesystem(engineparticles)
 
+ cam.x = focuspart.x - 64
+ cam.y = focuspart.y - 64
+ cam.v = { x = focuspart.v.x, y = focuspart.v.y }
 end
 
 -- adds force at position calculating torque
@@ -136,7 +139,7 @@ function addforce(part, pos, fdir)
  part.v.y += directforce * ndiff.y
 
  -- debug
- vray(pos, fdir, 10, 10)
+ vray(pos, fdir, 100, 10)
  vray(pos, diff, 1, 3)
 end
 
@@ -148,6 +151,8 @@ end
 function _draw()
  cls()
 
+ camera(cam.x,cam.y)
+
  drawparticlesline(engineparticles, 5)
  drawparticlescolor(engineparticles, 6)
 
@@ -156,19 +161,17 @@ function _draw()
   --print(parts[i].v.y, 10, 10, 10)
  end
 
- cam.x = focuspart.x - 64
- cam.y = focuspart.y - 64
- cam.v = { x = focuspart.v.x, y = focuspart.v.y }
+
 
  -- ground
  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
 
- camera(cam.x,cam.y)
+ vray({x = focuspart.x, y = focuspart.y}, focuspart.v, 5, 10)
 
  -- temp
  fpos = { x = focuspart.x + 5, y = focuspart.y }
  fdir = { x = 0, y = 0.1 }
- addforce(focuspart, fpos, fdir)
+ --addforce(focuspart, fpos, fdir)
 end
 
 function drawpart(part)
