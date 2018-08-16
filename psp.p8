@@ -1,6 +1,7 @@
 -- pico space program
 -- by nothke
 
+doground = false
 groundy = 120
 
 cam = {}
@@ -92,7 +93,7 @@ function _update()
   boomvelocity = part.v.y > 3
 
   -- ground collision
-  if collided then
+  if doground and collided then
    if boomvelocity then
     del(parts, part)
     boom(pos)
@@ -173,10 +174,10 @@ function _draw()
   --print(parts[i].v.y, 10, 10, 10)
  end
 
-
-
  -- ground
- line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
+ if doground then
+  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
+ end
 
  vray({x = focuspart.x, y = focuspart.y}, focuspart.v, 5, 10)
 
@@ -284,7 +285,7 @@ function updateparticlesystem(ps)
 
     particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
 
-    if particle.pos.y > groundy then
+    if doground and particle.pos.y > groundy then
      randbounce = 0.2 + rnd(1)
      particle.velocity.y = -particle.velocity.y * randbounce * 0.3
      particle.pos.y = groundy
