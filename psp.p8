@@ -42,6 +42,7 @@ end
 -- inputs
 in_thrt = 0
 in_rot = 0
+in_x = false
 
 function _update()
  -- inputs
@@ -53,6 +54,8 @@ function _update()
   in_thrt = 1 
   else in_thrt = 0
  end
+
+ in_x = btn(4)
 
  -- physics
 
@@ -124,9 +127,18 @@ function _update()
  cam.v = { x = focuspart.v.x, y = focuspart.v.y }
 end
 
+function localtoworldpos(part, lpos)
+ lpos = {
+  x = part.x + part.r.x * lpos.x + part.f.x * lpos.y,
+  y = part.y + part.r.y * lpos.x + part.f.y * lpos.y
+ }
+
+ return lpos
+end
+
 -- adds force at position calculating torque
 function addforce(part, pos, fdir)
- diff = { x = pos.x - part.x, y = pos.y - part.y }
+ diff = { x = part.x - pos.x, y = part.y - pos.y }
  r = length(diff)
  ndiff = normalize(diff)
 
@@ -135,11 +147,11 @@ function addforce(part, pos, fdir)
  
  -- t = f * r 
  part.av += radialforce * r
- part.v.x += directforce * ndiff.x
- part.v.y += directforce * ndiff.y
+ part.v.x += directforce * ndiff.x * 100
+ part.v.y += directforce * ndiff.y * 100
 
  -- debug
- vray(pos, fdir, 100, 10)
+ vray(pos, fdir, 10000, 9)
  vray(pos, diff, 1, 3)
 end
 
@@ -169,13 +181,17 @@ function _draw()
  vray({x = focuspart.x, y = focuspart.y}, focuspart.v, 5, 10)
 
  -- temp
- fpos = { x = focuspart.x + 5, y = focuspart.y }
- fdir = { x = 0, y = 0.1 }
- --addforce(focuspart, fpos, fdir)
+ if in_x then
+  --fpos = { x = focuspart.x + 7, y = focuspart.y }
+  fpos = { x = 7, y = 3 }
+  fpos = localtoworldpos(focuspart, fpos)
+  fdir = { x = 0.001, y = -0.002 }
+  addforce(focuspart, fpos, fdir)
+ end
 end
 
 function drawpart(part)
- carwdt = 4
+ carwdt = 8
 
  v1 = {}
  v1.x = part.x + sin(part.a) * carwdt
