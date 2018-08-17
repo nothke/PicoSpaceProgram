@@ -756,5 +756,5 @@ function printshd(text, x, y, col)
  print(text, x, y, col)
 end
 
-menuitem(1, "build mode", function() mode = 0 end)
-menuitem(2, "flight mode", function() mode = 1 end)
+menuitem(1, "fly", function() mode = 1 end)
+menuitem(2, "build", function() mode = 0 end)
