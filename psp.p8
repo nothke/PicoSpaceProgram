@@ -13,6 +13,8 @@ propoangulardrag = 0.1
 particlespeedmult = 5
 drawui = false
 
+debuglines = false
+
 -- part graphics
 lines_pod = {
  {x=-4, y=-4}, {x= 0, y= 4},
@@ -338,11 +340,13 @@ function addforce(craft, pos, fdir)
  craft.v.y += directforce * ndiff.y * 100
 
  -- debug
+ if debuglines then
  add(addforces, {
   pos = pos, 
   dirf = fdir,
   diff = diff
   })
+ end
 end
 
 function boom(pos)
@@ -495,7 +499,8 @@ function drawcraft(craft)
   end
  end
 
- spr(2, craft.x - 4, craft.y - 4)
+ -- draw com
+ --spr(2, craft.x - 4, craft.y - 4)
 end
 
 function drawlinesoffset(lines, offset, col)
