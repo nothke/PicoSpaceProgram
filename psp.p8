@@ -129,6 +129,8 @@ addforces = {}
 -- 1 fly mode
 mode = 0
 
+symmetry = true
+
 mouse = {}
 wmouse = {}
 click = false
@@ -435,11 +437,18 @@ function _draw()
   rectfill(2,hovered * th + 1,w - 2,(hovered + 1) * th - 1,tcol)
 
   if click and not lastclicked then
-   if selected > 0 and mouse.x > w then -- add to craft
+   if selected > 0 and mouse.x > w then
+    -- attach | confirm | add to craft
     part = newpart(partlib[selected])
     local pos = {x = flr(mouse.x) - focuscraft.x, y = -flr(mouse.y) + focuscraft.y}
     addpart(craft, part, pos) -- attach
-    --prints("added! "..#focuscraft.parts, 10)
+
+    if symmetry then
+     part = newpart(partlib[selected])
+     part.mirror = true
+     pos.x = flr(128-mouse.x) - focuscraft.x
+     addpart(craft, part, pos)
+    end
    end
 
    selected = hovered + 1
@@ -450,6 +459,10 @@ function _draw()
    print(partlib[selected].name, w + 4, 3, 9)
 
    drawlinesoffset(partlib[selected].lines, mouse, 9, true)
+   if symmetry then
+    mouseinv = { x= 128 - mouse.x, y = mouse.y }
+    drawlinesoffset(partlib[selected].lines, mouseinv, 9, true, true)
+   end
   elseif hovered > -1 then
    print(partlib[hovered+1].name, w + 4, 3, 6)
   end
@@ -535,8 +548,10 @@ function drawcraft(craft)
   col = 7
 
   for i=1,#part.lines,2 do
-   l0 = {x = part.x + part.lines[i].x,   y = part.y + part.lines[i].y}
-   l1 = {x = part.x + part.lines[i+1].x, y = part.y + part.lines[i+1].y}
+   local m = 1
+   if (part.mirror) m = -1
+   l0 = {x = part.x + part.lines[i].x*m  , y = part.y + part.lines[i].y}
+   l1 = {x = part.x + part.lines[i+1].x*m, y = part.y + part.lines[i+1].y}
 
    v0 = localtoworldpos(craft, l0)
    v1 = localtoworldpos(craft, l1)
@@ -549,11 +564,12 @@ function drawcraft(craft)
  --spr(2, craft.x - 4, craft.y - 4)
 end
 
-function drawlinesoffset(lines, offset, col, invert)
+function drawlinesoffset(lines, offset, col, invert, mirror)
  for i=1,#lines,2 do
   if (invert) s=-1 else s=1
-  v0 = {x = lines[i  ].x + offset.x, y = s * lines[i  ].y + offset.y}
-  v1 = {x = lines[i+1].x + offset.x, y = s * lines[i+1].y + offset.y}
+  if (mirror) m=-1 else m=1
+  v0 = {x = m * lines[i  ].x + offset.x, y = s * lines[i  ].y + offset.y}
+  v1 = {x = m * lines[i+1].x + offset.x, y = s * lines[i+1].y + offset.y}
 
   vline(v0, v1, col)
  end
@@ -805,3 +821,4 @@ end
 
 menuitem(1, "fly", function() mode = 1 end)
 menuitem(2, "build", function() mode = 0 end)
+menuitem(3, "toggle symmetry", function() symmetry = not symmetry end)
