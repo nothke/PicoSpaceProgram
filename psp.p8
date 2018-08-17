@@ -29,6 +29,26 @@ lines_tank = {
  {x= 4, y=-4}, {x=-4, y=-4},
 }
 
+lines_thin_tank = {
+ {x=-2, y=-4}, {x=-2, y= 4},
+ {x=-2, y= 4}, {x= 2, y= 4},
+ {x= 2, y= 4}, {x= 2, y=-4},
+ {x= 2, y=-4}, {x=-2, y=-4},
+}
+
+lines_thicc_tank = {
+ {x=-8, y=-4}, {x=-8, y= 4},
+ {x=-8, y= 4}, {x= 8, y= 4},
+ {x= 8, y= 4}, {x= 8, y=-4},
+ {x= 8, y=-4}, {x=-8, y=-4},
+}
+
+lines_thin_cone = {
+ {x=-2, y=-4}, {x= 2, y= 4},
+ {x= 2, y= 4}, {x= 2, y=-4},
+ {x= 2, y=-4}, {x=-2, y=-4},
+}
+
 lines_bell = {
  {x=-3, y=-4}, {x= 4, y= 4},
  {x= 4, y= 4}, {x=-4, y= 4},
@@ -48,6 +68,24 @@ part_standard_tank = {
  name = "fuel tank",
  lines = lines_tank,
  fuel = 10,
+}
+
+part_thin_tank = {
+ name = "thin tank",
+ lines = lines_thin_tank,
+ fuel = 5,
+}
+
+part_thicc_tank = {
+ name = "thicc tank",
+ lines = lines_thicc_tank,
+ fuel = 20,
+}
+
+part_thin_cone = {
+ name = "thin cone",
+ lines = lines_thin_cone,
+ fuel = 2,
 }
 
 part_engine = {
@@ -71,7 +109,10 @@ partlib = {
  part_standard_tank,
  part_engine,
  part_pod,
- part_rcs
+ part_rcs,
+ part_thin_cone,
+ part_thin_tank,
+ part_thicc_tank
 }
 
 -- dont change
