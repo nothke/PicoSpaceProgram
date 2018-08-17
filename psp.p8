@@ -189,7 +189,11 @@ function initcraft()
  a = 0.375, -- angle
  av = 0, -- angular velocity
  parts = {},
- com = {x = 0, y = 0} } -- center of mass
+ com = {x = 0, y = 0}, -- center of mass
+
+ numthrusters = 0,
+ numtanks = 0
+ } 
 
  add(crafts, craft)
  return craft
@@ -199,6 +203,9 @@ function addpart(craft, part, lpos)
  add(craft.parts, part)
  part.x = lpos.x
  part.y = lpos.y
+
+ if (part.isthruster) craft.numthrusters += 1
+ if (part.fuel ~= nil) craft.numtanks += 1
 end
 
 function newpart(pt)
@@ -313,7 +320,10 @@ function _update()
       pvel = {
       x = craft.v.x - craft.f.x * particlespeedmult, 
       y = craft.v.y - craft.f.y * particlespeedmult}
-      addparticle(engineparticles, 3, ppos, pvel, 3, 10, 20)
+      
+      local numparticles = 10 / craft.numthrusters
+      if (numparticles < 1) numparticles = 1
+      addparticle(engineparticles, numparticles, ppos, pvel, 3, 10, 20)
      end
     end
    end
