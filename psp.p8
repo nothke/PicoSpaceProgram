@@ -134,6 +134,7 @@ symmetry = true
 mouse = {}
 wmouse = {}
 click = false
+rclick = false
 
 function _init()
  poke(0x5f2d, 1)
@@ -208,6 +209,13 @@ function addpart(craft, part, lpos)
  if (part.fuel ~= nil) craft.numtanks += 1
 end
 
+function removepart(craft, part)
+ if (part.isthruster) craft.numthrusters -= 1
+ if (part.fuel ~= nil) craft.numtanks -= 1
+
+ del(craft.parts, part)
+end
+
 function newpart(pt)
  part = initpart()
 
@@ -255,6 +263,7 @@ function _update()
  mouse = {x = stat(32), y = stat(33)}
  wmouse = {x = cam.x + mouse.x, y = cam.y + mouse.y}
  click = stat(34) == 1
+ rclick = stat(34) == 2
 
  -- physics
  if mode ~= 0 then
@@ -278,7 +287,7 @@ function _update()
     for p=1,#craft.parts do
      if craft.parts[p].isthruster then
       local part = craft.parts[p]
-      local ppos = localtoworldpartpos(craft, part, {x=0,y=0})
+      local ppos = local2worldpartpos(craft, part)
       local f = {x=craft.f.x*0.001,y=craft.f.y*0.001} -- temp
       addforce(craft, ppos, f)
      end
@@ -316,11 +325,11 @@ function _update()
  
     if part.isthruster then
      if in_thrt > 0 then
-      ppos = localtoworldpartpos(craft, part, {x = 0, y = 0})
+      ppos = local2worldpartpos(craft, part)
       pvel = {
       x = craft.v.x - craft.f.x * particlespeedmult, 
       y = craft.v.y - craft.f.y * particlespeedmult}
-      
+
       local numparticles = 10 / craft.numthrusters
       if (numparticles < 1) numparticles = 1
       addparticle(engineparticles, numparticles, ppos, pvel, 3, 10, 20)
@@ -354,15 +363,17 @@ function resetcraft(craft)
   updatecraftvectors(craft)
 end
 
-function localtoworldpartpos(craft, part, lpos)
- l = { 
-  x = part.x + lpos.x,
-  y = part.y + lpos.y }
-
- return localtoworldpos(craft, l)
+function local2worldpartposoffset(craft, part, lpos)
+ l = { x = part.x + lpos.x, y = part.y + lpos.y }
+ return local2worldpos(craft, l)
 end
 
-function localtoworldpos(transform, lpos)
+function local2worldpartpos(craft, part)
+ l = { x = part.x, y = part.y }
+ return local2worldpos(craft, l)
+end
+
+function local2worldpos(transform, lpos)
  lpos = {
   x = transform.x + transform.r.x * lpos.x + transform.f.x * lpos.y,
   y = transform.y + transform.r.y * lpos.x + transform.f.y * lpos.y
@@ -371,7 +382,7 @@ function localtoworldpos(transform, lpos)
  return lpos
 end
 
-function worldtolocalpos(transform, pos)
+function world2localpos(transform, pos)
  local diff = { x = transform.x - pos.x, y = transform.y - pos.y }
  local _x = -dot(diff, transform.r)
  local _y = -dot(diff, transform.f)
@@ -477,6 +488,18 @@ function _draw()
    print(partlib[hovered+1].name, w + 4, 3, 6)
   end
 
+  -- remove part
+  closestpart = getclosestpart()
+  if closestpart then
+   p = local2worldpartpos(craft, closestpart)
+   line(p.x-5,p.y-5,p.x+5,p.y+5,8)
+   line(p.x-5,p.y+5,p.x+5,p.y-5,8)
+   if rclick and not lastclicked then
+    print("aiijiji")
+    removepart(craft, closestpart)
+   end
+  end
+
   rect(0,0,w,127,6)
 
   local offset = { x = w/2, y = sy }
@@ -514,13 +537,13 @@ function _draw()
 
  if click then
   if not lastclicked then
-   lclickstartpos = worldtolocalpos(focuscraft, wmouse)
+   lclickstartpos = world2localpos(focuscraft, wmouse)
   end
 
   --fpos = { x = focuspart.x + 7, y = focuspart.y }
   fpos = { x = 7, y = 3 }
-  --fpos = localtoworldpos(focuspart, fpos)
-  fpos = localtoworldpos(focuscraft, lclickstartpos)
+  --fpos = local2worldpos(focuspart, fpos)
+  fpos = local2worldpos(focuscraft, lclickstartpos)
 
   --fdir = { x = 0.001, y = -0.002 }
   fdir = {
@@ -563,8 +586,8 @@ function drawcraft(craft)
    l0 = {x = part.x + part.lines[i].x*m  , y = part.y + part.lines[i].y}
    l1 = {x = part.x + part.lines[i+1].x*m, y = part.y + part.lines[i+1].y}
 
-   v0 = localtoworldpos(craft, l0)
-   v1 = localtoworldpos(craft, l1)
+   v0 = local2worldpos(craft, l0)
+   v1 = local2worldpos(craft, l1)
 
    vline(v0, v1, col)
   end
@@ -594,8 +617,8 @@ function drawpart(part)
  col = 7
 
  for i=1,#part.lines,2 do
-  v0 = localtoworldpos(part, part.lines[i])
-  v1 = localtoworldpos(part, part.lines[i+1])
+  v0 = local2worldpos(part, part.lines[i])
+  v1 = local2worldpos(part, part.lines[i+1])
 
   vline(v0, v1, col)
  end
@@ -611,6 +634,22 @@ function drawpart(part)
  vline(pos, _forward, 12)
  vline(pos, _right, 8)
  ]]
+end
+
+r2=4*4
+
+function getclosestpart()
+ --print(mouse.x.." "..mouse.y, 12, 12, 12)
+
+ for part in all(focuscraft.parts) do
+  local _x = focuscraft.x + part.x - mouse.x
+  local _y = focuscraft.y - part.y - mouse.y
+  --print(_x.." ".._y, 12, 18, 9)
+  --pset(_x,_y,10)
+  if r2 > _x*_x + _y*_y then
+   return part
+  end
+ end
 end
 
 function updatecraftvectors(craft)
