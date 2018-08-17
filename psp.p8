@@ -398,7 +398,7 @@ function _draw()
     part = newpart(partlib[selected])
     local pos = {x = flr(mouse.x) - focuscraft.x, y = -flr(mouse.y) + focuscraft.y}
     addpart(craft, part, pos) -- attach
-    prints("added! "..#focuscraft.parts, 10)
+    --prints("added! "..#focuscraft.parts, 10)
    end
 
    selected = hovered + 1
@@ -406,16 +406,18 @@ function _draw()
 
   if selected > 0 then
    --prints("sel: "..partlib[selected].name, 8)
-   print("sel: "..partlib[selected].name, w + 5, 5, 8)
+   print(partlib[selected].name, w + 4, 3, 9)
 
-   drawlinesoffset(partlib[selected].lines, mouse, 9)
+   drawlinesoffset(partlib[selected].lines, mouse, 9, true)
+  elseif hovered > -1 then
+   print(partlib[hovered+1].name, w + 4, 3, 6)
   end
 
   rect(0,0,w,127,6)
 
   local offset = { x = w/2, y = sy }
   for i=1,#partlib do
-   drawlinesoffset(partlib[i].lines, offset, 7)
+   drawlinesoffset(partlib[i].lines, offset, 7, true)
    offset.y += oy 
   end
 
@@ -434,7 +436,10 @@ function _draw()
   line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
  end
 
- vray({x = focuscraft.x, y = focuscraft.y}, focuscraft.v, 5, 10)
+ -- velocity ray
+ if debuglines then
+  vray({x = focuscraft.x, y = focuscraft.y}, focuscraft.v, 5, 10)
+ end
 
  -- temp
 
@@ -503,10 +508,11 @@ function drawcraft(craft)
  --spr(2, craft.x - 4, craft.y - 4)
 end
 
-function drawlinesoffset(lines, offset, col)
+function drawlinesoffset(lines, offset, col, invert)
  for i=1,#lines,2 do
-  v0 = vadd(lines[i], offset)
-  v1 = vadd(lines[i+1], offset)
+  if (invert) s=-1 else s=1
+  v0 = {x = lines[i  ].x + offset.x, y = s * lines[i  ].y + offset.y}
+  v1 = {x = lines[i+1].x + offset.x, y = s * lines[i+1].y + offset.y}
 
   vline(v0, v1, col)
  end
