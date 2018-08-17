@@ -3,15 +3,15 @@
 
 -- settings:
 -- - physics
-doground = true
+doground = false
 groundy = 120
 
-gravity = 0.05
+gravity = 0--0.05
 propoangulardrag = 0.1
 
 -- - graphical
 particlespeedmult = 5
-
+drawui = false
 
 -- part graphics
 lines_pod = {
@@ -73,6 +73,8 @@ crafts = {}
 focuscraft = {}
 engineparticles = {}
 
+addforces = {}
+
 function _init()
  poke(0x5f2d, 1)
 
@@ -87,8 +89,17 @@ function _init()
  part = newpart(part_standard_tank)
  addpart(craft, part, {x = 0, y = 4})
 
- part = newpart(part_engine)
+ part = newpart(part_standard_tank)
  addpart(craft, part, {x = 8, y = 4})
+
+ part = newpart(part_standard_tank)
+ addpart(craft, part, {x = 16, y = 4})
+
+ part = newpart(part_standard_tank)
+ addpart(craft, part, {x = 24, y = 4})
+
+ part = newpart(part_engine)
+ addpart(craft, part, {x = 24, y = -4})
 
  part = newpart(part_pod)
  addpart(craft, part, {x = 0, y = 12})
@@ -189,8 +200,20 @@ function _update()
   craft.x += craft.v.x
   craft.y += craft.v.y
 
-  craft.v.x += craft.f.x * in_thrt * 0.2
-  craft.v.y += craft.f.y * in_thrt * 0.2
+  -- process thrusters
+  if in_thrt > 0 then
+   for p=1,#craft.parts do
+    if craft.parts[p].isthruster then
+     local part = craft.parts[p]
+     local ppos = localtoworldpartpos(craft, part, {x=0,y=0})
+     local f = {x=craft.f.x*0.001,y=craft.f.y*0.001} -- temp
+     addforce(craft, ppos, f)
+    end
+   end
+  end
+
+  --craft.v.x += craft.f.x * in_thrt * 0.2
+  --craft.v.y += craft.f.y * in_thrt * 0.2
 
   -- step angular velocity
   craft.a += craft.av
@@ -281,8 +304,11 @@ function addforce(craft, pos, fdir)
  craft.v.y += directforce * ndiff.y * 100
 
  -- debug
- vray(pos, fdir, 10000, 9)
- vray(pos, diff, 1, 3)
+ add(addforces, {
+  pos = pos, 
+  dirf = fdir,
+  diff = diff
+  })
 end
 
 function boom(pos)
@@ -345,12 +371,22 @@ function _draw()
  prevmouse = {x = wmouse.x, y = wmouse.y}
  lastclicked = click
 
+ -- debug forces
+ for k in pairs(addforces) do
+  af = addforces[k]
+  vray(af.pos, af.dirf, -100000, 9)
+  vray(af.pos, af.diff, 1, 3)
+  addforces[k] = nil -- remove
+ end
+
  -- ui
- h = flr(-(focuscraft.y - groundy))
- hstr = ""..h
- txtx = 64+15-#hstr*4
- rectfill(cam.x+64-14,cam.y,cam.x+64+14,cam.y+10,6)
- print(h, cam.x+txtx, cam.y+1, 5)
+ if drawui then
+  h = flr(-(focuscraft.y - groundy))
+  hstr = ""..h
+  txtx = 64+15-#hstr*4
+  rectfill(cam.x+64-14,cam.y,cam.x+64+14,cam.y+10,6)
+  print(h, cam.x+txtx, cam.y+1, 5)
+ end
 end
 
 function drawcraft(craft)
@@ -589,6 +625,10 @@ function rspr(sx,sy,x,y,a,w)
   dx0+=ddx0
   dy0+=ddy0
  end
+end
+
+function prints(text, col)
+ print(text, cam.x + 10, cam.y + 10, col)
 end
 
 -- print with shadow
