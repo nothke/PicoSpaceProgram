@@ -3,10 +3,10 @@
 
 -- settings:
 -- - physics
-doground = false
+doground = true
 groundy = 120
 
-gravity = 0--0.05
+gravity = 0.05
 propoangulardrag = 0.1
 
 -- - graphical
@@ -65,21 +65,41 @@ part_rcs = {
  lines = lines_rcs
 }
 
+partlib = {
+ part_standard_tank,
+ part_engine,
+ part_pod,
+ part_rcs
+}
+
 -- dont change
 dt = 1/30 -- deltatime
 
-cam = {}
+cam = {x=0, y=0}
 crafts = {}
 focuscraft = {}
 engineparticles = {}
 
 addforces = {}
 
+-- 0 build mode
+-- 1 fly mode
+mode = 0
+
+mouse = {}
+wmouse = {}
+click = false
+
 function _init()
  poke(0x5f2d, 1)
 
+
  craft = initcraft()
 
+ part = newpart(part_pod)
+ addpart(craft, part, {x = 0, y = 12})
+
+--[[
  part = newpart(part_engine)
  addpart(craft, part, {x = 0, y = -12})
 
@@ -100,9 +120,8 @@ function _init()
 
  part = newpart(part_engine)
  addpart(craft, part, {x = 24, y = -4})
+]]
 
- part = newpart(part_pod)
- addpart(craft, part, {x = 0, y = 12})
 
  focuscraft = craft
 end
@@ -180,89 +199,104 @@ function _update()
 
  in_x = btn(4)
 
+ -- mouse
+ mouse = {x = stat(32), y = stat(33)}
+ wmouse = {x = cam.x + mouse.x, y = cam.y + mouse.y}
+ click = stat(34) == 1
+
  -- physics
- for i=1,#crafts,1 do
-  craft = crafts[i]
+ if mode ~= 0 then
+  for i=1,#crafts,1 do
+   craft = crafts[i]
+ 
+   craft.av += in_rot * 0.003
+   a = craft.a
 
-  craft.av += in_rot * 0.003
-  a = craft.a
-  
-  craft.f.x = sin(a + 0.125)
-  craft.f.y = cos(a + 0.125)
-  
-  craft.r.x = sin(a + 0.375)
-  craft.r.y = cos(a + 0.375) 
-
-  -- add gravity
-  craft.v.y += gravity
-
-  -- step velocity
-  craft.x += craft.v.x
-  craft.y += craft.v.y
-
-  -- process thrusters
-  if in_thrt > 0 then
-   for p=1,#craft.parts do
-    if craft.parts[p].isthruster then
-     local part = craft.parts[p]
-     local ppos = localtoworldpartpos(craft, part, {x=0,y=0})
-     local f = {x=craft.f.x*0.001,y=craft.f.y*0.001} -- temp
-     addforce(craft, ppos, f)
+   updatecraftvectors(craft) 
+ 
+   -- add gravity
+   craft.v.y += gravity
+ 
+   -- step velocity
+   craft.x += craft.v.x
+   craft.y += craft.v.y
+ 
+   -- process thrusters
+   if in_thrt > 0 then
+    for p=1,#craft.parts do
+     if craft.parts[p].isthruster then
+      local part = craft.parts[p]
+      local ppos = localtoworldpartpos(craft, part, {x=0,y=0})
+      local f = {x=craft.f.x*0.001,y=craft.f.y*0.001} -- temp
+      addforce(craft, ppos, f)
+     end
     end
    end
-  end
-
-  --craft.v.x += craft.f.x * in_thrt * 0.2
-  --craft.v.y += craft.f.y * in_thrt * 0.2
-
-  -- step angular velocity
-  craft.a += craft.av
-  craft.av *= 1 - propoangulardrag
-
-  collided = craft.y > groundy - 2
-  boomvelocity = craft.v.y > 3
-
-  -- ground collision
-  if doground and collided then
-   if boomvelocity then
-    del(crafts, craft)
-    boom(pos)
-    goto outaloop
+ 
+   --craft.v.x += craft.f.x * in_thrt * 0.2
+   --craft.v.y += craft.f.y * in_thrt * 0.2
+ 
+   -- step angular velocity
+   craft.a += craft.av
+   craft.av *= 1 - propoangulardrag
+ 
+   collided = craft.y > groundy - 2
+   boomvelocity = craft.v.y > 3
+ 
+   -- ground collision
+   if doground and collided then
+    if boomvelocity then
+     del(crafts, craft)
+     boom(pos)
+     goto outaloop
+    end
+ 
+    craft.v.y = 0
+    craft.v.y = -gravity
+    craft.v.x *= 0.9 -- friction
+ 
+    craft.y = groundy - 2
    end
-
-   craft.v.y = 0
-   craft.v.y = -gravity
-   craft.v.x *= 0.9 -- friction
-
-   craft.y = groundy - 2
-  end
-
-  -- particles
-  for i=1,#craft.parts,1 do
-   part = craft.parts[i]
-
-   if part.isthruster then
-    if in_thrt > 0 then
-     ppos = localtoworldpartpos(craft, part, {x = 0, y = 0})
-     pvel = {
-     x = craft.v.x - craft.f.x * particlespeedmult, 
-     y = craft.v.y - craft.f.y * particlespeedmult}
-     addparticle(engineparticles, 10, ppos, pvel, 3, 10, 20)
+ 
+   -- particles
+   for i=1,#craft.parts,1 do
+    part = craft.parts[i]
+ 
+    if part.isthruster then
+     if in_thrt > 0 then
+      ppos = localtoworldpartpos(craft, part, {x = 0, y = 0})
+      pvel = {
+      x = craft.v.x - craft.f.x * particlespeedmult, 
+      y = craft.v.y - craft.f.y * particlespeedmult}
+      addparticle(engineparticles, 3, ppos, pvel, 3, 10, 20)
+     end
     end
    end
+ 
+   ::outaloop::
   end
-
-  ::outaloop::
+ 
+  updateparticlesystem(engineparticles)
+ 
+  cam.x = focuscraft.x - 64
+  cam.y = focuscraft.y - 64
+  cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
+ else -- mode == 0 build mode
+  resetcraft(focuscraft)
  end
-
- updateparticlesystem(engineparticles)
-
- cam.x = focuscraft.x - 64
- cam.y = focuscraft.y - 64
- cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
 
  --cam.x = 0
  --cam.y = 0
+end
+
+function resetcraft(craft)
+  craft.x = 64
+  craft.y = 64
+  craft.a = 0.375
+  craft.v.x = 0
+  craft.v.y = 0
+  craft.av = 0
+  updatecraftvectors(craft)
 end
 
 function localtoworldpartpos(craft, part, lpos)
@@ -319,11 +353,69 @@ end
 lastclicked = false
 lclickstartpos = {}
 prevmouse = {}
+selected = 0
 
 function _draw()
  cls()
 
  camera(cam.x,cam.y)
+
+ -- build mode
+ if mode == 0 then
+  cls(0)
+
+  cam.x = 0
+  cam.y = 0
+
+  camera(0,0)
+
+  -- draw build ui
+  local w = 20
+  local sy = 8
+  local oy = 16
+  local th = 16
+  rectfill(0,0,w,127,1)
+
+  hovered = -1
+
+  if mouse.x < w then
+   hovered = flr(mouse.y / th) 
+   if hovered >= #partlib then hovered = -1 end
+  else
+   hovered = -1
+  end
+
+  tcol = 13
+  if (click) tcol = 12
+  rectfill(2,hovered * th + 1,w - 2,(hovered + 1) * th - 1,tcol)
+
+  if click and not lastclicked then
+   if selected > 0 and mouse.x > w then -- add to craft
+    part = newpart(partlib[selected])
+    local pos = {x = flr(mouse.x) - focuscraft.x, y = -flr(mouse.y) + focuscraft.y}
+    addpart(craft, part, pos) -- attach
+    prints("added! "..#focuscraft.parts, 10)
+   end
+
+   selected = hovered + 1
+  end
+
+  if selected > 0 then
+   --prints("sel: "..partlib[selected].name, 8)
+   print("sel: "..partlib[selected].name, w + 5, 5, 8)
+
+   drawlinesoffset(partlib[selected].lines, mouse, 9)
+  end
+
+  rect(0,0,w,127,6)
+
+  local offset = { x = w/2, y = sy }
+  for i=1,#partlib do
+   drawlinesoffset(partlib[i].lines, offset, 7)
+   offset.y += oy 
+  end
+
+ end
 
  drawparticlesline(engineparticles, 5)
  drawparticlescolor(engineparticles, 6)
@@ -342,10 +434,7 @@ function _draw()
 
  -- temp
 
- -- mouse
- mouse = {x = stat(32), y = stat(33)}
- wmouse = {x = cam.x + mouse.x, y = cam.y + mouse.y}
- click = stat(34) == 1
+
 
  spr(0,wmouse.x - 4,wmouse.y - 4)
  --pset(mousex, mousey, 10)
@@ -405,6 +494,21 @@ function drawcraft(craft)
    vline(v0, v1, col)
   end
  end
+
+ spr(2, craft.x - 4, craft.y - 4)
+end
+
+function drawlinesoffset(lines, offset, col)
+ for i=1,#lines,2 do
+  v0 = vadd(lines[i], offset)
+  v1 = vadd(lines[i+1], offset)
+
+  vline(v0, v1, col)
+ end
+end
+
+function vadd(v0, v1)
+ return { x = v0.x + v1.x, y = v0.y + v1.y }
 end
 
 function drawpart(part)
@@ -429,6 +533,16 @@ function drawpart(part)
  vline(pos, _forward, 12)
  vline(pos, _right, 8)
  ]]
+end
+
+function updatecraftvectors(craft)
+ a = craft.a
+
+ craft.f.x = sin(a + 0.125)
+ craft.f.y = cos(a + 0.125)
+   
+ craft.r.x = sin(a + 0.375)
+ craft.r.y = cos(a + 0.375)
 end
 
 -- particles
@@ -636,3 +750,6 @@ function printshd(text, x, y, col)
  print(text, x+1, y+1, 0)
  print(text, x, y, col)
 end
+
+menuitem(1, "build mode", function() mode = 0 end)
+menuitem(2, "flight mode", function() mode = 1 end)
