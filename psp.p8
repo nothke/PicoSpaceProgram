@@ -135,6 +135,7 @@ mouse = {}
 wmouse = {}
 click = false
 rclick = false
+tooltiptext = ""
 
 function _init()
  poke(0x5f2d, 1)
@@ -428,6 +429,11 @@ function _draw()
 
  camera(cam.x,cam.y)
 
+  -- ground
+ if doground then
+  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
+ end
+
  -- build mode
  if mode == 0 then
   cls(0)
@@ -508,6 +514,10 @@ function _draw()
    offset.y += oy 
   end
 
+  if (uibutton(25, 128-15, 10, 10, "symmetry")) symmetry = not symmetry
+  spr(3,25+2,128-15+2)
+
+  print(tooltiptext, w + 4, 3, 6)
  end
 
  drawparticlesline(engineparticles, 5)
@@ -518,10 +528,7 @@ function _draw()
    --print(parts[i].v.y, 10, 10, 10)
  end
 
- -- ground
- if doground then
-  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
- end
+
 
  -- velocity ray
  if debuglines then
@@ -652,6 +659,26 @@ function updatecraftvectors(craft)
    
  craft.r.x = sin(a + 0.375)
  craft.r.y = cos(a + 0.375)
+end
+
+-- ui button
+function uibutton(x, y, w, h, tooltip)
+ rectfill(x,y,x+w,y+h,5)
+
+ tooltiptext = ""
+ if mouse.x > x and mouse.x < x + w and
+    mouse.y > y and mouse.y < y + h then
+  rectfill(x,y,x+w,y+h,13)
+  tooltiptext = tooltip
+
+  if click and not lastclicked then
+   return true
+  end
+ end
+
+ rect(x,y,x+w,y+h,6)
+
+ return false
 end
 
 -- particles
