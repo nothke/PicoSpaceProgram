@@ -147,6 +147,8 @@ addforces = {}
 mode = 0
 
 symmetry = true
+rotate = 0
+gridsnap = false
 
 mouse = {}
 wmouse = {}
@@ -479,17 +481,22 @@ function _draw()
   if (click) tcol = 12
   rectfill(2,hovered * th + 1,w - 2,(hovered + 1) * th - 1,tcol)
 
+  p = {x = mouse.x, y = mouse.y}
+   if gridsnap then p = {
+    x = flr((mouse.x + 4) / 8) * 8,
+    y = flr((mouse.y + 4) / 8) * 8} end
+
   if click and not lastclicked then
    if selected > 0 and mouse.x > w then
     -- attach | confirm | add to craft
     part = newpart(partlib[selected])
-    local pos = {x = flr(mouse.x) - focuscraft.x, y = -flr(mouse.y) + focuscraft.y}
+    local pos = {x = flr(p.x) - focuscraft.x, y = -flr(p.y) + focuscraft.y}
     addpart(craft, part, pos) -- attach
 
     if symmetry then
      part = newpart(partlib[selected])
      part.mirror = true
-     pos.x = flr(128-mouse.x) - focuscraft.x
+     pos.x = flr(128-p.x) - focuscraft.x
      addpart(craft, part, pos)
     end
    end
@@ -501,10 +508,10 @@ function _draw()
    --prints("sel: "..partlib[selected].name, 8)
    print(partlib[selected].name, w + 4, 3, 9)
 
-   drawlinesoffset(partlib[selected].lines, mouse, 9, true)
+   drawlinesoffset(partlib[selected].lines, p, 9, true)
    if symmetry then
-    mouseinv = { x= 128 - mouse.x, y = mouse.y }
-    drawlinesoffset(partlib[selected].lines, mouseinv, 9, true, true)
+    pinv = { x= 128 - p.x, y = p.y }
+    drawlinesoffset(partlib[selected].lines, pinv, 9, true, true)
    end
   elseif hovered > -1 then
    print(partlib[hovered+1].name, w + 4, 3, 6)
@@ -534,8 +541,13 @@ function _draw()
 
   toolx = 25
   tooly = 128-15
-  if (uibutton(toolx, tooly, 10, 10, "symmetry")) symmetry = not symmetry
-  spr(3,toolx+2,tooly+2)
+  if (uibutton(toolx, tooly, 10, 10, "symmetry "..(symmetry and 'on' or 'off'))) symmetry = not symmetry
+  spr(3,toolx+2,tooly+2) toolx += 10
+  if  uibutton(toolx, tooly, 10, 10, "rotate") then rotate= (rotate+1)%4 end
+  spr(5,toolx+2,tooly+2) toolx += 10
+  if  uibutton(toolx, tooly, 10, 10, "grid snap "..(gridsnap and 'on' or 'off')) then 
+   gridsnap = not gridsnap end
+  spr(6,toolx+2,tooly+2)
 
   if (uibutton(128-11, 0, 10, 10, "fly")) mode = 1
   spr(4,128-11+2,0+2)
