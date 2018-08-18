@@ -17,6 +17,17 @@ debuglines = false
 
 -- part graphics
 lines_pod = {
+ -- outline
+ {x=-4, y=-4}, {x= 0, y= 4},
+ {x= 0, y= 4}, {x= 4, y=-4},
+ {x= 4, y=-4}, {x= 0, y=-5},
+ {x= 0, y=-5}, {x=-4, y=-4},
+ -- central line
+ {x= 0, y=-1}, {x= 1, y=-1}
+}
+
+lines_cone = {
+ -- outline
  {x=-4, y=-4}, {x= 0, y= 4},
  {x= 0, y= 4}, {x= 4, y=-4},
  {x= 4, y=-4}, {x=-4, y=-4},
@@ -82,6 +93,11 @@ part_thicc_tank = {
  fuel = 20,
 }
 
+part_cone = {
+ name = "cone",
+ lines = lines_cone,
+}
+
 part_thin_cone = {
  name = "thin cone",
  lines = lines_thin_cone,
@@ -108,6 +124,7 @@ part_rcs = {
 partlib = {
  part_standard_tank,
  part_engine,
+ part_cone,
  part_pod,
  part_rcs,
  part_thin_cone,
