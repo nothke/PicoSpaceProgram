@@ -489,7 +489,7 @@ function _draw()
   end
 
   -- remove part
-  closestpart = getclosestpart()
+  closestpart = getoverlappingpart()
   if closestpart then
    p = local2worldpartpos(craft, closestpart)
    line(p.x-5,p.y-5,p.x+5,p.y+5,8)
@@ -623,22 +623,14 @@ function drawpart(part)
   vline(v0, v1, col)
  end
 
- --[[
  pos = { x = part.x, y = part.y }
- _forward = { 
-  x = part.x + part.f.x * 10, 
-  y = part.y + part.f.y * 10 }
- _right = { 
-  x = part.x + part.r.x * 10, 
-  y = part.y + part.r.y * 10 }
- vline(pos, _forward, 12)
- vline(pos, _right, 8)
- ]]
+ vray(pos, part.f * 10, 12)
+ vray(pos, part.r * 10, 8)
 end
 
 r2=4*4
 
-function getclosestpart()
+function getoverlappingpart()
  --print(mouse.x.." "..mouse.y, 12, 12, 12)
 
  for part in all(focuscraft.parts) do
