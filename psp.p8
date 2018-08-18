@@ -152,6 +152,7 @@ mode = 0
 symmetry = true
 rotate = 0
 gridsnap = false
+deletemode = false
 
 mouse = {}
 wmouse = {}
@@ -453,6 +454,7 @@ function _draw()
   -- ground
  if doground then
   line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
+  rectfill(cam.x - 1000, groundy - 100, cam.x + 1000,groundy,12)
  end
 
  -- build mode
@@ -523,16 +525,19 @@ function _draw()
    if (pt.fuel ~= nil) print('fuel: '..pt.fuel, tooltipx, tooltipy + 6, 5)
   end
 
-  if rclick and not lastclicked then selected = 0 end
+  if rclick and not lastclicked then
+   selected = 0 
+   deletemode = false
+  end
 
   -- remove part
   closestpart = getoverlappingpart()
-  if closestpart then
+  if closestpart and deletemode then
    p = local2worldpartpos(craft, closestpart)
    line(p.x-5,p.y-5,p.x+5,p.y+5,8)
    line(p.x-5,p.y+5,p.x+5,p.y-5,8)
-   tooltip("rmb to remove")
-   if rclick and not lastclicked then
+   tooltip("lmb to remove")
+   if click and not lastclicked then
     removepart(craft, closestpart)
    end
   end
@@ -553,7 +558,9 @@ function _draw()
   spr(5,toolx+2,tooly+2) toolx += 10
   if  uibutton(toolx, tooly, 10, 10, "grid snap "..(gridsnap and 'on' or 'off')) then 
    gridsnap = not gridsnap end
-  spr(6,toolx+2,tooly+2)
+  spr(6,toolx+2,tooly+2) toolx += 10
+  if  uibutton(toolx, tooly, 10, 10, "remove part") then deletemode = not deletemode end
+  spr(7,toolx+2,tooly+2) toolx += 10
 
   if (uibutton(128-11, 0, 10, 10, "fly")) mode = 1
   spr(4,128-11+2,0+2)
