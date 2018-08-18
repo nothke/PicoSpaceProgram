@@ -135,7 +135,6 @@ mouse = {}
 wmouse = {}
 click = false
 rclick = false
-tooltiptext = ""
 
 function _init()
  poke(0x5f2d, 1)
@@ -494,14 +493,16 @@ function _draw()
    print(partlib[hovered+1].name, w + 4, 3, 6)
   end
 
+  if rclick and not lastclicked then selected = 0 end
+
   -- remove part
   closestpart = getoverlappingpart()
   if closestpart then
    p = local2worldpartpos(craft, closestpart)
    line(p.x-5,p.y-5,p.x+5,p.y+5,8)
    line(p.x-5,p.y+5,p.x+5,p.y-5,8)
+   tooltip("rmb to remove")
    if rclick and not lastclicked then
-    print("aiijiji")
     removepart(craft, closestpart)
    end
   end
@@ -511,13 +512,18 @@ function _draw()
   local offset = { x = w/2, y = sy }
   for i=1,#partlib do
    drawlinesoffset(partlib[i].lines, offset, 7, true)
-   offset.y += oy 
+   offset.y += oy
   end
 
-  if (uibutton(25, 128-15, 10, 10, "symmetry")) symmetry = not symmetry
-  spr(3,25+2,128-15+2)
+  toolx = 25
+  tooly = 128-15
+  if (uibutton(toolx, tooly, 10, 10, "symmetry")) symmetry = not symmetry
+  spr(3,toolx+2,tooly+2)
 
-  print(tooltiptext, w + 4, 3, 6)
+  if (uibutton(128-11, 0, 10, 10, "fly")) mode = 1
+  spr(4,128-11+2,0+2)
+
+  
  end
 
  drawparticlesline(engineparticles, 5)
@@ -662,14 +668,13 @@ function updatecraftvectors(craft)
 end
 
 -- ui button
-function uibutton(x, y, w, h, tooltip)
+function uibutton(x, y, w, h, tooltiptext)
  rectfill(x,y,x+w,y+h,5)
 
- tooltiptext = ""
  if mouse.x > x and mouse.x < x + w and
     mouse.y > y and mouse.y < y + h then
+  tooltip(tooltiptext)
   rectfill(x,y,x+w,y+h,13)
-  tooltiptext = tooltip
 
   if click and not lastclicked then
    return true
@@ -680,6 +685,11 @@ function uibutton(x, y, w, h, tooltip)
 
  return false
 end
+
+function tooltip(str)
+ print(str, 24, 3, 6)
+end
+
 
 -- particles
 
