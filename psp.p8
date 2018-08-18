@@ -15,6 +15,9 @@ drawui = false
 
 debuglines = false
 
+tooltipx = 24
+tooltipy = 3
+
 -- part graphics
 lines_pod = {
  -- outline
@@ -76,7 +79,7 @@ lines_rcs = {
 
 -- part data
 part_standard_tank = {
- name = "fuel tank",
+ name = "standard tank",
  lines = lines_tank,
  fuel = 10,
 }
@@ -514,7 +517,10 @@ function _draw()
     drawlinesoffset(partlib[selected].lines, pinv, 9, true, true)
    end
   elseif hovered > -1 then
-   print(partlib[hovered+1].name, w + 4, 3, 6)
+   local pt = partlib[hovered+1]
+   print(pt.name, tooltipx, tooltipy, 6)
+   if (pt.isthruster) print('thruster', tooltipx, tooltipy + 6, 5)
+   if (pt.fuel ~= nil) print('fuel: '..pt.fuel, tooltipx, tooltipy + 6, 5)
   end
 
   if rclick and not lastclicked then selected = 0 end
@@ -718,7 +724,6 @@ end
 function tooltip(str)
  print(str, 24, 3, 6)
 end
-
 
 -- particles
 
