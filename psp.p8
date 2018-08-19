@@ -6,14 +6,14 @@
 doground = true
 groundy = 120
 
-gravity = 0.05
+gravity = 1
 propoangulardrag = 0
 
 -- - graphical
 particlespeedmult = 5
 drawui = false
 
-debuglines = false
+debuglines = true
 
 tooltipx = 24
 tooltipy = 3
@@ -81,47 +81,56 @@ lines_rcs = {
 part_standard_tank = {
  name = "standard tank",
  lines = lines_tank,
+ mass = 1,
  fuel = 10,
 }
 
 part_thin_tank = {
  name = "thin tank",
  lines = lines_thin_tank,
+ mass = 0.5,
  fuel = 5,
 }
 
 part_thicc_tank = {
  name = "thicc tank",
  lines = lines_thicc_tank,
+ mass = 5,
  fuel = 20,
 }
 
 part_cone = {
  name = "cone",
  lines = lines_cone,
+  mass = 0.4,
 }
 
 part_thin_cone = {
  name = "thin cone",
  lines = lines_thin_cone,
+ mass = 0.2,
  fuel = 2,
+
 }
 
 part_engine = {
  name = "rocket engine",
  lines = lines_bell,
+ mass = 2,
  isthruster = true,
- force = 10
+ force = 50
 }
 
 part_pod = {
  name = "crew pod",
- lines = lines_pod
+ lines = lines_pod,
+ mass = 2,
 }
 
 part_rcs = {
  name = "rcs thruster",
- lines = lines_rcs
+ lines = lines_rcs,
+ mass = 0.1,
 }
 
 partlib = {
@@ -137,6 +146,7 @@ partlib = {
 
 -- dont change
 dt = 1/30 -- deltatime
+dt100 = 3.3333 -- dt * 100
 
 cam = {x=0, y=0}
 crafts = {}
@@ -216,7 +226,8 @@ function initcraft()
  av = 0, -- angular velocity
  parts = {},
  com = {x = 0, y = 0}, -- center of mass
- inertia = 1000, -- moment of inertia (angular)
+ inertia = 0, -- moment of inertia (angular)
+ mass = 0, -- mass
 
  numthrusters = 0,
  numtanks = 0
@@ -235,13 +246,15 @@ function addpart(craft, part, lpos)
  if (part.fuel ~= nil) craft.numtanks += 1
 
  craft.inertia += 1000
+ craft.mass += part.mass
 end
 
 function removepart(craft, part)
  if (part.isthruster) craft.numthrusters -= 1
  if (part.fuel ~= nil) craft.numtanks -= 1
 
- craft.inertia -= 100
+ craft.inertia -= 1000
+ craft.mass -= part.mass
 
  del(craft.parts, part)
 end
@@ -250,6 +263,7 @@ function newpart(pt)
  part = initpart()
 
  part.lines = pt.lines
+ part.mass = pt.mass
  if pt.isthruster ~= nil then 
   part.isthruster = pt.isthruster
   part.force = pt.force
@@ -312,8 +326,8 @@ function _update()
    craft.v.y += gravity
  
    -- step velocity
-   craft.x += craft.v.x
-   craft.y += craft.v.y
+   craft.x += craft.v.x * dt
+   craft.y += craft.v.y * dt
  
    -- process thrusters
    if in_thrt > 0 then
@@ -324,6 +338,7 @@ function _update()
       local f = {
        x = craft.f.x * part.force,
        y = craft.f.y * part.force}
+       print(ppos, ppos.x, ppos.y, 10)
       addforce(craft, ppos, f)
      end
     end
@@ -435,10 +450,10 @@ function addforce(craft, pos, fdir)
  
  -- t = f * r 
  -- deltaangvel = (r * m * dt) / torque
- craft.av += (radialforce * dt * r) / (craft.inertia)
- --craft.av += (radialforce * r * dt) / craft.inertia
- craft.v.x += directforce * ndiff.x * dt
- craft.v.y += directforce * ndiff.y * dt
+ --craft.av += (radialforce * dt * r) / (craft.inertia)
+ mult = (directforce * 3.3333) -- dt * 100
+ craft.v.x += ndiff.x * mult
+ craft.v.y += ndiff.y * mult
 
  -- debug
  if debuglines then
@@ -471,6 +486,7 @@ function _draw()
  if doground then
   line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
   rectfill(cam.x - 1000, groundy - 100, cam.x + 1000,groundy,12)
+  rect(0,0,100,100, 8)
  end
 
  -- build mode
@@ -599,6 +615,7 @@ function _draw()
 
  -- velocity ray
  if debuglines then
+  lv = {x = focuscraft.v.x*0.1, y = focuscraft.v.y*0.1}
   vray({x = focuscraft.x, y = focuscraft.y}, focuscraft.v, 5, 10)
  end
 
@@ -633,8 +650,8 @@ function _draw()
  -- debug forces
  for k in pairs(addforces) do
   af = addforces[k]
-  vray(af.pos, af.dirf, -100000, 9)
-  vray(af.pos, af.diff, 1, 3)
+  vray(af.pos, af.dirf, 0.1, 9)
+  vray(af.pos, af.diff, 0.1, 3)
   addforces[k] = nil -- remove
  end
 
@@ -648,7 +665,14 @@ function _draw()
  end
 
  onbutton = frameonbutton
+
+ print('mass '..focuscraft.mass, cam.x + 68, cam.y + 128 - 20, 9)
+ print('inrt '..focuscraft.inertia, cam.x + 68, cam.y + 128 - 14, 9)
+ print('inrt '..focuscraft.av, cam.x + 68, cam.y + 128 - 7, 9)
 end
+------------------
+-- end of main
+------------------
 
 function drawcraft(craft)
  for i=1,#craft.parts,1 do
@@ -808,8 +832,8 @@ function updateparticlesystem(ps)
     particle.lastpos.x = particle.pos.x
     particle.lastpos.y = particle.pos.y
 
-    particle.pos.x += particle.velocity.x - cam.v.x
-    particle.pos.y += particle.velocity.y - cam.v.y
+    particle.pos.x += (particle.velocity.x - cam.v.x) * dt
+    particle.pos.y += (particle.velocity.y - cam.v.y) * dt
 
     particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
 
