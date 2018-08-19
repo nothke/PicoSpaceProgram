@@ -159,7 +159,7 @@ wmouse = {}
 click = false
 rclick = false
 onbutton = false
-prevonbutton = false
+frameonbutton = false
 
 function _init()
  poke(0x5f2d, 1)
@@ -245,7 +245,10 @@ function newpart(pt)
  part = initpart()
 
  part.lines = pt.lines
- if (pt.isthruster ~= nil) part.isthruster = pt.isthruster
+ if pt.isthruster ~= nil then 
+  part.isthruster = pt.isthruster
+  part.force = pt.force
+ end
  if (pt.fuel ~= nil ) part.fuel = pt.fuel
  return part
 end
@@ -314,8 +317,8 @@ function _update()
       local part = craft.parts[p]
       local ppos = local2worldpartpos(craft, part)
       local f = {
-       x=craft.f.x*part.force,
-       y=craft.f.y*part.force} -- temp
+       x = craft.f.x * part.force,
+       y = craft.f.y * part.force}
       addforce(craft, ppos, f)
      end
     end
@@ -423,7 +426,7 @@ function addforce(craft, pos, fdir)
  ndiff = normalize(diff)
 
  directforce = dot(ndiff, fdir)
- radialforce = dot(right(ndiff), fdir) * 0.5
+ radialforce = dot(right(ndiff), fdir)
  
  -- t = f * r 
  craft.av += radialforce * r * dt
@@ -453,7 +456,7 @@ selected = 0
 function _draw()
  cls()
 
- onbutton = false
+ frameonbutton = false
 
  camera(cam.x,cam.y)
 
@@ -497,7 +500,7 @@ function _draw()
    x = flr((mouse.x + 4) / 8) * 8,
    y = flr((mouse.y + 4) / 8) * 8} end
 
-  if click and not lastclicked and not prevonbutton then
+  if click and not lastclicked and not onbutton then
    if selected > 0 and mouse.x > w then
     
     -- attach | confirm | add to craft
@@ -637,7 +640,7 @@ function _draw()
   print(h, cam.x+txtx, cam.y+1, 5)
  end
 
- prevonbutton = onbutton
+ onbutton = frameonbutton
 end
 
 function drawcraft(craft)
@@ -729,7 +732,7 @@ function uibutton(x, y, w, h, tooltiptext)
   tooltip(tooltiptext)
   rectfill(x,y,x+w,y+h,13)
 
-  onbutton = true
+  frameonbutton = true
 
   if click and not lastclicked then
    return true
