@@ -111,7 +111,7 @@ part_engine = {
  name = "rocket engine",
  lines = lines_bell,
  isthruster = true,
- force = 1
+ force = 10
 }
 
 part_pod = {
@@ -158,6 +158,8 @@ mouse = {}
 wmouse = {}
 click = false
 rclick = false
+onbutton = false
+prevonbutton = false
 
 function _init()
  poke(0x5f2d, 1)
@@ -311,7 +313,9 @@ function _update()
      if craft.parts[p].isthruster then
       local part = craft.parts[p]
       local ppos = local2worldpartpos(craft, part)
-      local f = {x=craft.f.x*0.001,y=craft.f.y*0.001} -- temp
+      local f = {
+       x=craft.f.x*part.force,
+       y=craft.f.y*part.force} -- temp
       addforce(craft, ppos, f)
      end
     end
@@ -422,9 +426,9 @@ function addforce(craft, pos, fdir)
  radialforce = dot(right(ndiff), fdir) * 0.5
  
  -- t = f * r 
- craft.av += radialforce * r
- craft.v.x += directforce * ndiff.x * 100
- craft.v.y += directforce * ndiff.y * 100
+ craft.av += radialforce * r * dt
+ craft.v.x += directforce * ndiff.x * dt
+ craft.v.y += directforce * ndiff.y * dt
 
  -- debug
  if debuglines then
@@ -448,6 +452,8 @@ selected = 0
 
 function _draw()
  cls()
+
+ onbutton = false
 
  camera(cam.x,cam.y)
 
@@ -487,12 +493,13 @@ function _draw()
   rectfill(2,hovered * th + 1,w - 2,(hovered + 1) * th - 1,tcol)
 
   p = {x = mouse.x, y = mouse.y}
-   if gridsnap then p = {
-    x = flr((mouse.x + 4) / 8) * 8,
-    y = flr((mouse.y + 4) / 8) * 8} end
+  if gridsnap then p = {
+   x = flr((mouse.x + 4) / 8) * 8,
+   y = flr((mouse.y + 4) / 8) * 8} end
 
-  if click and not lastclicked then
+  if click and not lastclicked and not prevonbutton then
    if selected > 0 and mouse.x > w then
+    
     -- attach | confirm | add to craft
     part = newpart(partlib[selected])
     local pos = {x = flr(p.x) - focuscraft.x, y = -flr(p.y) + focuscraft.y}
@@ -507,6 +514,8 @@ function _draw()
    end
 
    selected = hovered + 1
+
+   if (selected > 0) deletemode = false
   end
 
   if selected > 0 then
@@ -562,7 +571,7 @@ function _draw()
   if  uibutton(toolx, tooly, 10, 10, "remove part") then deletemode = not deletemode end
   spr(7,toolx+2,tooly+2) toolx += 10
 
-  if (uibutton(128-11, 0, 10, 10, "fly")) mode = 1
+  if (uibutton(128-11, 0, 10, 10, "launch")) mode = 1
   spr(4,128-11+2,0+2)
 
   
@@ -627,6 +636,8 @@ function _draw()
   rectfill(cam.x+64-14,cam.y,cam.x+64+14,cam.y+10,6)
   print(h, cam.x+txtx, cam.y+1, 5)
  end
+
+ prevonbutton = onbutton
 end
 
 function drawcraft(craft)
@@ -717,6 +728,8 @@ function uibutton(x, y, w, h, tooltiptext)
     mouse.y > y and mouse.y < y + h then
   tooltip(tooltiptext)
   rectfill(x,y,x+w,y+h,13)
+
+  onbutton = true
 
   if click and not lastclicked then
    return true
