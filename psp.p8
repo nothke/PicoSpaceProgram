@@ -247,6 +247,8 @@ function addpart(craft, part, lpos)
 
  craft.inertia += 1000
  craft.mass += part.mass
+
+ updatecom(craft)
 end
 
 function removepart(craft, part)
@@ -257,6 +259,7 @@ function removepart(craft, part)
  craft.mass -= part.mass
 
  del(craft.parts, part)
+ updatecom(craft)
 end
 
 function newpart(pt)
@@ -286,6 +289,19 @@ function initpart()
   com = {x = 0, y = 0}, -- center of mass
   isthruster = false}
  return part
+end
+
+function updatecom(craft)
+ local mx, my, tm = 0,0,0
+ for i=1,#craft.parts do
+  part = craft.parts[i]
+  mx += part.mass * part.x
+  my += part.mass * part.y
+  tm += part.mass
+ end
+
+ craft.com.x = mx/tm
+ craft.com.y = my/tm
 end
 
 -- inputs
@@ -694,7 +710,7 @@ function drawcraft(craft)
  end
 
  -- draw com
- --spr(2, craft.x - 4, craft.y - 4)
+ spr(2, craft.x + craft.com.x - 4, craft.y - craft.com.y - 4)
 end
 
 function drawlinesoffset(lines, offset, col, invert, mirror)
