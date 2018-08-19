@@ -7,7 +7,7 @@ doground = true
 groundy = 120
 
 gravity = 0.05
-propoangulardrag = 0.1
+propoangulardrag = 0
 
 -- - graphical
 particlespeedmult = 5
@@ -216,6 +216,7 @@ function initcraft()
  av = 0, -- angular velocity
  parts = {},
  com = {x = 0, y = 0}, -- center of mass
+ inertia = 1000, -- moment of inertia (angular)
 
  numthrusters = 0,
  numtanks = 0
@@ -232,11 +233,15 @@ function addpart(craft, part, lpos)
 
  if (part.isthruster) craft.numthrusters += 1
  if (part.fuel ~= nil) craft.numtanks += 1
+
+ craft.inertia += 1000
 end
 
 function removepart(craft, part)
  if (part.isthruster) craft.numthrusters -= 1
  if (part.fuel ~= nil) craft.numtanks -= 1
+
+ craft.inertia -= 100
 
  del(craft.parts, part)
 end
@@ -298,7 +303,7 @@ function _update()
   for i=1,#crafts,1 do
    craft = crafts[i]
  
-   craft.av += in_rot * 0.003
+   craft.av += in_rot / craft.inertia * 3
    a = craft.a
 
    updatecraftvectors(craft) 
@@ -336,11 +341,11 @@ function _update()
  
    -- ground collision
    if doground and collided then
-    if boomvelocity then
-     del(crafts, craft)
-     boom(pos)
-     goto outaloop
-    end
+    --if boomvelocity then
+    -- del(crafts, craft)
+    -- boom(pos)
+    -- goto outaloop
+    --end
  
     craft.v.y = 0
     craft.v.y = -gravity
@@ -429,7 +434,9 @@ function addforce(craft, pos, fdir)
  radialforce = dot(right(ndiff), fdir)
  
  -- t = f * r 
- craft.av += radialforce * r * dt
+ -- deltaangvel = (r * m * dt) / torque
+ craft.av += (radialforce * dt * r) / (craft.inertia)
+ --craft.av += (radialforce * r * dt) / craft.inertia
  craft.v.x += directforce * ndiff.x * dt
  craft.v.y += directforce * ndiff.y * dt
 
