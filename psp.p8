@@ -172,39 +172,16 @@ onbutton = false
 frameonbutton = false
 
 function _init()
- poke(0x5f2d, 1)
-
+ poke(0x5f2d, 1) -- enable mouse
 
  craft = initcraft()
+ focuscraft = craft
 
+ -- add initial parts here
  part = newpart(part_pod)
  addpart(craft, part, {x = 0, y = 0})
 
---[[
- part = newpart(part_engine)
- addpart(craft, part, {x = 0, y = -12})
-
- part = newpart(part_standard_tank)
- addpart(craft, part, {x = 0, y = -4})
-
- part = newpart(part_standard_tank)
- addpart(craft, part, {x = 0, y = 4})
-
- part = newpart(part_standard_tank)
- addpart(craft, part, {x = 8, y = 4})
-
- part = newpart(part_standard_tank)
- addpart(craft, part, {x = 16, y = 4})
-
- part = newpart(part_standard_tank)
- addpart(craft, part, {x = 24, y = 4})
-
- part = newpart(part_engine)
- addpart(craft, part, {x = 24, y = -4})
-]]
-
-
- focuscraft = craft
+ build()
 end
 
 function initcraft()
