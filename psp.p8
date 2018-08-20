@@ -178,7 +178,7 @@ function _init()
  craft = initcraft()
 
  part = newpart(part_pod)
- addpart(craft, part, {x = 0, y = 12})
+ addpart(craft, part, {x = 0, y = 0})
 
 --[[
  part = newpart(part_engine)
@@ -241,6 +241,8 @@ function addpart(craft, part, lpos)
  add(craft.parts, part)
  part.x = lpos.x
  part.y = lpos.y
+ part.ox = lpos.x
+ part.oy = lpos.y
 
  if (part.isthruster) craft.numthrusters += 1
  if (part.fuel ~= nil) craft.numtanks += 1
@@ -362,6 +364,8 @@ function _update()
  
    --craft.v.x += craft.f.x * in_thrt * 0.2
    --craft.v.y += craft.f.y * in_thrt * 0.2
+
+   applyforces(craft)
  
    -- step angular velocity
    craft.a += craft.av
@@ -457,7 +461,33 @@ end
 
 -- adds force at position calculating torque
 function addforce(craft, pos, fdir)
- diff = { x = craft.x - pos.x, y = craft.y - pos.y }
+ add(addforces, {
+  pos = pos, 
+  dirf = fdir,
+  diff = diff
+  })
+end
+
+function applyforces(craft)
+ local fpos = {x=0,y=0}
+ local fdir = {x=0,y=0}
+ local fx, fy, fdx, fdy, fm = 0,0,0
+ for force in all(addforces) do
+  flen = length(force.dirf)
+  fpos.x += force.pos.x * flen
+  fpos.y += force.pos.y * flen
+  fdir.x += force.dirf.x
+  fdir.y += force.dirf.y
+ end
+
+ len = length(fdir)
+ fpos.x /= len
+ fpos.y /= len
+
+ pset(mouse.x, mouse.y+5, 10)
+ print('frce '.. len, cam.x + 68, cam.y + 128 - 7, 9)
+
+ diff = { x = craft.x - fpos.x, y = craft.y - fpos.y }
  r = length(diff)
  ndiff = normalize(diff)
 
@@ -466,19 +496,13 @@ function addforce(craft, pos, fdir)
  
  -- t = f * r 
  -- deltaangvel = (r * m * dt) / torque
- --craft.av += (radialforce * dt * r) / (craft.inertia)
+ craft.av += (radialforce * dt * r) / (craft.inertia)
  mult = (directforce * 3.3333) -- dt * 100
  craft.v.x += ndiff.x * mult
  craft.v.y += ndiff.y * mult
 
- -- debug
- if debuglines then
- add(addforces, {
-  pos = pos, 
-  dirf = fdir,
-  diff = diff
-  })
- end
+ applyforce_pos.x = fpos.x
+ applyforce_pos.y = fpos.y
 end
 
 function launch()
@@ -494,6 +518,18 @@ function launch()
  focuscraft.com.y = 0
 end
 
+function build()
+ mode = 0
+
+ for part in all(focuscraft.parts) do
+  part.x = part.ox
+  part.y = part.oy
+ end
+
+ focuscraft.x = 0
+ focuscraft.y = 0
+end
+
 function boom(pos)
  v = { x =0, y = -3 }
  addparticle(engineparticles, 100, pos, v, 6, 10, 20)
@@ -503,6 +539,9 @@ lastclicked = false
 lclickstartpos = {}
 prevmouse = {}
 selected = 0
+
+applyforce_pos = {x=0,y=0}
+applyforce_dir = {x=0,y=0}
 
 function _draw()
  cls()
@@ -630,6 +669,8 @@ function _draw()
   spr(4,128-11+2,0+2)
 
   
+ --else
+  --if (uibutton(cam.x + 128-11, cam.y, 10, 10, "build")) build()
  end
 
  drawparticlesline(engineparticles, 5)
@@ -677,10 +718,17 @@ function _draw()
  lastclicked = click
 
  -- debug forces
+ u = 0
  for k in pairs(addforces) do
+
   af = addforces[k]
   vray(af.pos, af.dirf, 0.1, 9)
-  vray(af.pos, af.diff, 0.1, 3)
+  --vray(af.pos, af.diff, 0.1, 3)
+  --if u == 0 then
+  --print('frce '.. length(af.dirf), cam.x + 68, cam.y + 128 - 7, 9)
+  --end
+  --u+=1
+
   addforces[k] = nil -- remove
  end
 
@@ -697,10 +745,13 @@ function _draw()
 
  print('mass '..focuscraft.mass, cam.x + 68, cam.y + 128 - 20, 9)
  print('inrt '..focuscraft.inertia, cam.x + 68, cam.y + 128 - 14, 9)
- print('inrt '..focuscraft.av, cam.x + 68, cam.y + 128 - 7, 9)
+ --print('inrt '..focuscraft.av, cam.x + 68, cam.y + 128 - 7, 9)
+
+ print('fpos '..applyforce_pos.x, cam.x + 68, cam.y + 128 - 7, 9)
+ pset(applyforce_pos.x, applyforce_pos.y, 14)
 end
 ------------------
--- end of main
+-- end of draw
 ------------------
 
 function drawcraft(craft)
@@ -1015,5 +1066,5 @@ function printshd(text, x, y, col)
 end
 
 --menuitem(1, "fly", launch())
-menuitem(1, "build", function() mode = 0 end)
+menuitem(1, "build", build)
 menuitem(2, "toggle symmetry", function() symmetry = not symmetry end)
