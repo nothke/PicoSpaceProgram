@@ -118,7 +118,7 @@ part_engine = {
  lines = lines_bell,
  mass = 2,
  isthruster = true,
- force = 50
+ force = 1
 }
 
 part_pod = {
@@ -481,6 +481,19 @@ function addforce(craft, pos, fdir)
  end
 end
 
+function launch()
+ mode = 1
+
+ --offsetx = focuscraft.com.x
+ for part in all(focuscraft.parts) do
+  part.x -= focuscraft.com.x
+  part.y -= focuscraft.com.y
+ end
+
+ focuscraft.com.x = 0
+ focuscraft.com.y = 0
+end
+
 function boom(pos)
  v = { x =0, y = -3 }
  addparticle(engineparticles, 100, pos, v, 6, 10, 20)
@@ -613,7 +626,7 @@ function _draw()
   if  uibutton(toolx, tooly, 10, 10, "remove part") then deletemode = not deletemode end
   spr(7,toolx+2,tooly+2) toolx += 10
 
-  if (uibutton(128-11, 0, 10, 10, "launch")) mode = 1
+  if (uibutton(128-11, 0, 10, 10, "launch")) launch()
   spr(4,128-11+2,0+2)
 
   
@@ -632,7 +645,7 @@ function _draw()
  -- velocity ray
  if debuglines then
   lv = {x = focuscraft.v.x*0.1, y = focuscraft.v.y*0.1}
-  vray({x = focuscraft.x, y = focuscraft.y}, focuscraft.v, 5, 10)
+  vray({x = focuscraft.x, y = focuscraft.y}, focuscraft.v, 0.1, 10)
  end
 
  -- temp
@@ -1001,6 +1014,6 @@ function printshd(text, x, y, col)
  print(text, x, y, col)
 end
 
-menuitem(1, "fly", function() mode = 1 end)
-menuitem(2, "build", function() mode = 0 end)
-menuitem(3, "toggle symmetry", function() symmetry = not symmetry end)
+--menuitem(1, "fly", launch())
+menuitem(1, "build", function() mode = 0 end)
+menuitem(2, "toggle symmetry", function() symmetry = not symmetry end)
