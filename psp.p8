@@ -151,6 +151,7 @@ dt100 = 3.3333 -- dt * 100
 cam = {x=0, y=0}
 crafts = {}
 focuscraft = {}
+buildparts={}
 engineparticles = {}
 
 addforces = {}
@@ -283,6 +284,19 @@ function updatecom(craft)
  craft.com.y = my/tm
 end
 
+function centercrafttocom(craft)
+ local wcom = local2worldpos(craft, focuscraft.com)
+ craft.x += wcom.x - craft.x
+ craft.y += wcom.y - craft.y
+
+ for part in all(focuscraft.parts) do
+  part.x -= focuscraft.com.x
+  part.y -= focuscraft.com.y
+ end
+
+ updatecom(craft)
+end
+
 -- inputs
 in_thrt = 0
 in_rot = 0
@@ -371,11 +385,13 @@ function _update()
     local colpos = local2worldpartpos(craft, part)
     colpos.y += 5
     if colpos.y > groundy then
-     coldir = {x=0,y=-1}
+     local coldir = {x=0,y=-1}
 
      if boomvelocity then
       removepart(craft, part)
+      centercrafttocom(craft)
       boom(colpos)
+      coldir.y = -3
       addforce(craft, colpos, coldir)
      else
       addforce(craft, colpos, coldir)
@@ -412,8 +428,8 @@ function _update()
  
   updateparticlesystem(engineparticles)
  
-  cam.x = focuscraft.x - 64
-  cam.y = focuscraft.y - 64
+  cam.x = lerp(cam.x, focuscraft.x - 64, 0.15)
+  cam.y = lerp(cam.y, focuscraft.y - 64, 0.15)
   cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
  else -- mode == 0 build mode
   --resetcraft(focuscraft)
@@ -501,11 +517,12 @@ end
 function launch()
  mode = 1
 
+ for i=1,#focuscraft.parts do
+  buildparts[i] = focuscraft.parts[i]
+ end  
+
  --offsetx = focuscraft.com.x
- for part in all(focuscraft.parts) do
-  part.x -= focuscraft.com.x
-  part.y -= focuscraft.com.y
- end
+ centercrafttocom(focuscraft)
 
  focuscraft.com.x = 0
  focuscraft.com.y = 0
@@ -513,6 +530,10 @@ end
 
 function build()
  mode = 0
+
+  for i=1,#buildparts do
+   focuscraft.parts[i] = buildparts[i]
+  end
 
  for part in all(focuscraft.parts) do
   part.x = part.ox
@@ -538,7 +559,7 @@ end
 
 function boom(pos)
  v = { x =0, y = -150 }
- addparticle(engineparticles, 100, pos, v, 500, 10, 20)
+ addparticle(engineparticles, 50, pos, v, 500, 10, 20)
 end
 
 lastclicked = false
