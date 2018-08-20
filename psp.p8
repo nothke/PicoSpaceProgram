@@ -393,22 +393,14 @@ function _update()
   cam.y = focuscraft.y - 64
   cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
  else -- mode == 0 build mode
-  resetcraft(focuscraft)
+  --resetcraft(focuscraft)
  end
 
  --cam.x = 0
  --cam.y = 0
 end
 
-function resetcraft(craft)
-  craft.x = 64
-  craft.y = 64
-  craft.a = 0.375
-  craft.v.x = 0
-  craft.v.y = 0
-  craft.av = 0
-  updatecraftvectors(craft)
-end
+
 
 function local2worldpartposoffset(craft, part, lpos)
  l = { x = part.x + lpos.x, y = part.y + lpos.y }
@@ -503,8 +495,21 @@ function build()
   part.y = part.oy
  end
 
- focuscraft.x = 0
- focuscraft.y = 0
+ resetcraft(focuscraft)
+ updatecom(focuscraft)
+
+ --focuscraft.x = 64
+ focuscraft.y = 31
+end
+
+function resetcraft(craft)
+  craft.x = 64
+  craft.y = 64
+  craft.a = 0.375
+  craft.v.x = 0
+  craft.v.y = 0
+  craft.av = 0
+  updatecraftvectors(craft)
 end
 
 function boom(pos)
@@ -644,8 +649,6 @@ function _draw()
 
   if (uibutton(128-11, 0, 10, 10, "launch")) launch()
   spr(4,128-11+2,0+2)
-
-  
  --else
   --if (uibutton(cam.x + 128-11, cam.y, 10, 10, "build")) build()
  end
