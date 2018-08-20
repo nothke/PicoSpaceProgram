@@ -4,13 +4,13 @@
 -- settings:
 -- - physics
 doground = true
-groundy = 120
+groundy = 120 -- y position of ground
 
 gravity = 1
 propoangulardrag = 0
 
 -- - graphical
-particlespeedmult = 5
+particlespeedmult = 200
 drawui = false
 
 debuglines = true
@@ -118,7 +118,7 @@ part_engine = {
  lines = lines_bell,
  mass = 2,
  isthruster = true,
- force = 1
+ force = 0.3
 }
 
 part_pod = {
@@ -348,7 +348,7 @@ function _update()
    craft.av *= 1 - propoangulardrag
  
    collided = craft.y > groundy - 2
-   boomvelocity = craft.v.y > 3
+   boomvelocity = craft.v.y > 30
  
    -- ground collision
    --[[
@@ -372,11 +372,18 @@ function _update()
     colpos.y += 5
     if colpos.y > groundy then
      coldir = {x=0,y=-1}
-     addforce(craft, colpos, coldir)
-     craft.v.y = -gravity
-     local diff = groundy - colpos.y
-     craft.y += diff
-     craft.v.x *= 0.9 -- friction
+
+     if boomvelocity then
+      removepart(craft, part)
+      boom(colpos)
+      addforce(craft, colpos, coldir)
+     else
+      addforce(craft, colpos, coldir)
+      craft.v.y = -gravity
+      craft.v.x *= 0.9 -- friction
+      local diff = groundy - colpos.y
+      craft.y += diff
+     end
     end
    end
 
@@ -395,7 +402,7 @@ function _update()
 
       local numparticles = 10 / craft.numthrusters
       if (numparticles < 1) numparticles = 1
-      addparticle(engineparticles, numparticles, ppos, pvel, 3, 10, 20)
+      addparticle(engineparticles, numparticles, ppos, pvel, 70, 10, 20)
      end
     end
    end
@@ -530,8 +537,8 @@ function resetcraft(craft)
 end
 
 function boom(pos)
- v = { x =0, y = -3 }
- addparticle(engineparticles, 100, pos, v, 6, 10, 20)
+ v = { x =0, y = -150 }
+ addparticle(engineparticles, 100, pos, v, 500, 10, 20)
 end
 
 lastclicked = false
