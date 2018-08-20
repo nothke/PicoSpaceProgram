@@ -333,7 +333,6 @@ function _update()
       local f = {
        x = craft.f.x * part.force,
        y = craft.f.y * part.force}
-       print(ppos, ppos.x, ppos.y, 10)
       addforce(craft, ppos, f)
      end
     end
@@ -342,7 +341,7 @@ function _update()
    --craft.v.x += craft.f.x * in_thrt * 0.2
    --craft.v.y += craft.f.y * in_thrt * 0.2
 
-   applyforces(craft)
+
  
    -- step angular velocity
    craft.a += craft.av
@@ -352,19 +351,36 @@ function _update()
    boomvelocity = craft.v.y > 3
  
    -- ground collision
+   --[[
    if doground and collided then
     --if boomvelocity then
     -- del(crafts, craft)
     -- boom(pos)
     -- goto outaloop
     --end
- 
+
     craft.v.y = 0
     craft.v.y = -gravity
     craft.v.x *= 0.9 -- friction
  
     craft.y = groundy - 2
+   end -- collision
+   ]]
+
+   for part in all(craft.parts) do
+    local colpos = local2worldpartpos(craft, part)
+    colpos.y += 5
+    if colpos.y > groundy then
+     coldir = {x=0,y=-1}
+     addforce(craft, colpos, coldir)
+     craft.v.y = -gravity
+     local diff = groundy - colpos.y
+     craft.y += diff
+     craft.v.x *= 0.9 -- friction
+    end
    end
+
+   applyforces(craft)
  
    -- particles
    for i=1,#craft.parts,1 do
@@ -454,7 +470,8 @@ function applyforces(craft)
  fpos.y /= len
 
  pset(mouse.x, mouse.y+5, 10)
- print('frce '.. len, cam.x + 68, cam.y + 128 - 7, 9)
+ print('cunt '.. #addforces, cam.x + 68, cam.y + 128 - 7, 9)
+ --print('frce '.. len, cam.x + 68, cam.y + 128 - 7, 9)
 
  diff = { x = craft.x - fpos.x, y = craft.y - fpos.y }
  r = length(diff)
@@ -534,8 +551,10 @@ function _draw()
 
   -- ground
  if doground then
-  line(cam.x -1000, groundy, cam.x + 10000, groundy, 1)
-  rectfill(cam.x - 1000, groundy - 100, cam.x + 1000,groundy,12)
+  
+  --rectfill(cam.x - 1000, groundy - 100, cam.x + 1000,groundy,12)
+  rectfill(cam.x - 1000, groundy, cam.x + 1000,groundy + 100,5)
+  line(cam.x -1000, groundy, cam.x + 10000, groundy, 6)
   rect(0,0,100,100, 8)
  end
 
@@ -698,6 +717,8 @@ function _draw()
  lastclicked = click
 
  -- debug forces
+  print('cunt '..#addforces, cam.x + 68, cam.y + 128 - 7, 9)
+
  u = 0
  for k in pairs(addforces) do
 
@@ -727,7 +748,8 @@ function _draw()
  print('inrt '..focuscraft.inertia, cam.x + 68, cam.y + 128 - 14, 9)
  --print('inrt '..focuscraft.av, cam.x + 68, cam.y + 128 - 7, 9)
 
- print('fpos '..applyforce_pos.x, cam.x + 68, cam.y + 128 - 7, 9)
+
+ --print('fpos '..applyforce_pos.x, cam.x + 68, cam.y + 128 - 7, 9)
  pset(applyforce_pos.x, applyforce_pos.y, 14)
 end
 ------------------
