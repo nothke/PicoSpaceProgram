@@ -469,8 +469,8 @@ function applyforces(craft)
  fpos.x /= len
  fpos.y /= len
 
- pset(mouse.x, mouse.y+5, 10)
- print('cunt '.. #addforces, cam.x + 68, cam.y + 128 - 7, 9)
+ --pset(mouse.x, mouse.y+5, 10)
+ --print('cunt '.. #addforces, cam.x + 68, cam.y + 128 - 7, 9)
  --print('frce '.. len, cam.x + 68, cam.y + 128 - 7, 9)
 
  diff = { x = craft.x - fpos.x, y = craft.y - fpos.y }
@@ -549,13 +549,25 @@ function _draw()
 
  camera(cam.x,cam.y)
 
+ -- draw spacegrid
+ for i=0,128,1 do
+  if flr(cam.x + i) % 20 == 0 then
+   line(cam.x + i, cam.y + 200, cam.x + i, cam.y - 200, 1)
+  end
+
+  if flr(cam.y + i) % 20 == 0 then
+   line(cam.x - 200, cam.y + i, cam.x + 200, cam.y + i, 1)
+  end
+ end
+
+
   -- ground
  if doground then
   
   --rectfill(cam.x - 1000, groundy - 100, cam.x + 1000,groundy,12)
   rectfill(cam.x - 1000, groundy, cam.x + 1000,groundy + 100,5)
   line(cam.x -1000, groundy, cam.x + 10000, groundy, 6)
-  rect(0,0,100,100, 8)
+  --rect(0,0,100,100, 8)
  end
 
  -- build mode
@@ -717,7 +729,7 @@ function _draw()
  lastclicked = click
 
  -- debug forces
-  print('cunt '..#addforces, cam.x + 68, cam.y + 128 - 7, 9)
+  --print('cunt '..#addforces, cam.x + 68, cam.y + 128 - 7, 9)
 
  u = 0
  for k in pairs(addforces) do
@@ -744,8 +756,8 @@ function _draw()
 
  onbutton = frameonbutton
 
- print('mass '..focuscraft.mass, cam.x + 68, cam.y + 128 - 20, 9)
- print('inrt '..focuscraft.inertia, cam.x + 68, cam.y + 128 - 14, 9)
+ --print('mass '..focuscraft.mass, cam.x + 68, cam.y + 128 - 20, 9)
+ --print('inrt '..focuscraft.inertia, cam.x + 68, cam.y + 128 - 14, 9)
  --print('inrt '..focuscraft.av, cam.x + 68, cam.y + 128 - 7, 9)
 
 
