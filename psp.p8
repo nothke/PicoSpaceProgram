@@ -425,15 +425,17 @@ function _update()
  
    ::outaloop::
   end
- 
-  updateparticlesystem(engineparticles)
- 
-  cam.x = lerp(cam.x, focuscraft.x - 64, 0.15)
-  cam.y = lerp(cam.y, focuscraft.y - 64, 0.15)
-  cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
+  
+  if #focuscraft.parts ~= 0 then
+   cam.x = lerp(cam.x, focuscraft.x - 64, 0.15)
+   cam.y = lerp(cam.y, focuscraft.y - 64, 0.15)
+   cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
+  end
  else -- mode == 0 build mode
   --resetcraft(focuscraft)
  end
+
+ updateparticlesystem(engineparticles)
 
  --cam.x = 0
  --cam.y = 0
@@ -710,6 +712,10 @@ function _draw()
   spr(4,128-11+2,0+2)
  --else
   --if (uibutton(cam.x + 128-11, cam.y, 10, 10, "build")) build()
+ else  --if mode ~= 0 then
+
+  if (uibutton(cam.x+128-11, cam.y, 10, 10, "build")) build()
+  spr(9,cam.x+128-11+2,cam.y+2)
  end
 
  drawparticlesline(engineparticles, 5)
@@ -732,8 +738,7 @@ function _draw()
 
 
 
- spr(0,wmouse.x - 4,wmouse.y - 4)
- --pset(mousex, mousey, 10)
+
 
  if click then
   if not lastclicked then
@@ -753,8 +758,7 @@ function _draw()
   addforce(focuscraft, fpos, fdir)
  end
 
- prevmouse = {x = wmouse.x, y = wmouse.y}
- lastclicked = click
+
 
  -- debug forces
   --print('cunt '..#addforces, cam.x + 68, cam.y + 128 - 7, 9)
@@ -781,6 +785,37 @@ function _draw()
   rectfill(cam.x+64-14,cam.y,cam.x+64+14,cam.y+10,6)
   print(h, cam.x+txtx, cam.y+1, 5)
  end
+
+ if #focuscraft.parts == 0 then
+  -- end screen
+  infox = 36
+  infoy = 20
+  local txtx=cam.x+64-infox+2
+  local txty=cam.y+64-infoy+10
+  rectfill(cam.x+64-infox, cam.y+64-infoy,   cam.x+64+infox, cam.y+64+infoy  ,1)
+  rect(    cam.x+64-infox, cam.y+64-infoy,   cam.x+64+infox, cam.y+64+infoy  ,6)
+  line(    cam.x+64-infox, cam.y+64-infoy+8, cam.x+64+infox, cam.y+64-infoy+8,6)
+  print("flight results",  cam.x+64-4*7, cam.y+64-infoy+2,6)
+  print("outcome: r.u.d",txtx,txty,6) txty+=6
+  print("flight time:",txtx,txty,6) txty+=6
+  print("max height?:",txtx,txty,6) txty+=6
+
+  butx = cam.x+64-infox
+  buty = cam.y+64+infoy-10
+  if (uibutton(butx, buty, 10, 10, "back to drawing board")) build()
+  spr(9,butx+2,buty+2)
+  butx+=10
+  if (uibutton(butx, buty, 10, 10, "retry")) build() launch()
+  spr(4,butx+2,buty+2)
+ end
+
+ -- draw mouse
+ spr(0,wmouse.x - 4,wmouse.y - 4)
+ --pset(mousex, mousey, 10)
+
+ -- update cursor
+ prevmouse = {x = wmouse.x, y = wmouse.y}
+ lastclicked = click
 
  onbutton = frameonbutton
 
@@ -880,8 +915,8 @@ end
 function uibutton(x, y, w, h, tooltiptext)
  rectfill(x,y,x+w,y+h,5)
 
- if mouse.x > x and mouse.x < x + w and
-    mouse.y > y and mouse.y < y + h then
+ if wmouse.x > x and wmouse.x < x + w and
+    wmouse.y > y and wmouse.y < y + h then
   tooltip(tooltiptext)
   rectfill(x,y,x+w,y+h,13)
 
@@ -898,7 +933,7 @@ function uibutton(x, y, w, h, tooltiptext)
 end
 
 function tooltip(str)
- print(str, 24, 3, 6)
+ print(str, cam.x+24, cam.y+3, 6)
 end
 
 -- particles
