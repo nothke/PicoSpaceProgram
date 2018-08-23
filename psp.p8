@@ -20,6 +20,9 @@ debuglines = true
 tooltipx = 24
 tooltipy = 3
 
+trajectorypoints = 20
+trajectory = {}
+
 -- part graphics
 lines_pod = {
  -- outline
@@ -455,7 +458,42 @@ function _update()
  --cam.y = 0
 end
 
+function traj()
+ local pos = {x=craft.x,y=craft.y}
+ local velo = {x=craft.v.x, y=craft.v.y}
+ for i=1,300 do
+  local lastp = {x=pos.x,y=pos.y}
+  local dv = gforce(pos)
+  velo.x += dv.x* 0.5
+  velo.y += dv.y* 0.5
+  pos.x+=velo.x*dt
+  pos.y+=velo.y*dt
+  local nextp = {x=pos.x,y=pos.y}
+  vline(lastp,nextp,4)
+  --vpset(nextp,7)
+ end
+end
 
+function gforce(pos)
+ local bdiff = { x=(pos.x-gbody.x)*0.01, y=(pos.y-gbody.y)*0.01 }
+ local bdiffn = normalize(bdiff)
+ local sqrmag = sqrlength(bdiff)
+ local gf = 5 / sqrmag
+ return {x= -bdiffn.x*gf, y=-bdiffn.y*gf}
+end
+
+function applygravity(pos, velo)
+   local bdiff = { x=(pos.x-gbody.x)*0.01, y=(pos.y-gbody.y)*0.01 }
+   local bdiffn = normalize(bdiff)
+   local sqrmag = sqrlength(bdiff)
+   local gf = 5 / sqrmag
+   local gravx = -bdiffn.x *gf
+   local gravy = -bdiffn.y *gf
+   velo.x += gravx * dt -- configurable step?
+   velo.y += gravy * dt
+   pos.x += velo.x *dt
+   pos.y += velo.y *dt
+end
 
 function local2worldpartposoffset(craft, part, lpos)
  l = { x = part.x + lpos.x, y = part.y + lpos.y }
@@ -731,6 +769,7 @@ function _draw()
  --else
   --if (uibutton(cam.x + 128-11, cam.y, 10, 10, "build")) build()
  else  --if mode ~= 0 then
+  traj()
 
   if (uibutton(cam.x+128-11, cam.y, 10, 10, "build")) build()
   spr(9,cam.x+128-11+2,cam.y+2)
