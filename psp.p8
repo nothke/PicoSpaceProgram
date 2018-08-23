@@ -9,6 +9,8 @@ groundy = 120 -- y position of ground
 gravity = 1
 propoangulardrag = 0
 
+gbody = {x=0, y=-100, r=100}
+
 -- - graphical
 particlespeedmult = 200
 drawui = false
@@ -172,6 +174,8 @@ rclick = false
 onbutton = false
 frameonbutton = false
 
+
+
 function _init()
  poke(0x5f2d, 1) -- enable mouse
 
@@ -332,7 +336,15 @@ function _update()
    updatecraftvectors(craft) 
  
    -- add gravity
-   craft.v.y += gravity
+   local bdiff = { x=(craft.x-gbody.x)*0.01, y=(craft.y-gbody.y)*0.01 }
+   local bdiffn = normalize(bdiff)
+   local sqrmag = sqrlength(bdiff)
+   local gf = 5 / sqrmag
+   local gravx = -bdiffn.x *gf
+   local gravy = -bdiffn.y *gf
+
+   craft.v.y += gravy * 0.5
+   craft.v.x += gravx * 0.5
  
    -- step velocity
    craft.x += craft.v.x * dt
@@ -425,7 +437,7 @@ function _update()
  
    ::outaloop::
   end
-  
+
   if #focuscraft.parts ~= 0 then
    cam.x = lerp(cam.x, focuscraft.x - 64, 0.15)
    cam.y = lerp(cam.y, focuscraft.y - 64, 0.15)
@@ -434,6 +446,8 @@ function _update()
  else -- mode == 0 build mode
   --resetcraft(focuscraft)
  end
+
+ if (cam.v == nil) cam.v = {x=0,y=0} -- temp solution to prevent error
 
  updateparticlesystem(engineparticles)
 
@@ -590,6 +604,10 @@ function _draw()
   end
  end
 
+ -- planet
+
+ circfill(gbody.x, gbody.y, gbody.r,2)
+ pset(gbody.x, gbody.y, 4)
 
   -- ground
  if doground then
@@ -1065,6 +1083,10 @@ end
 
 function dot(v1, v2)
  return v1.x * v2.x + v1.y * v2.y
+end
+
+function sqrlength(v)
+ return v.x*v.x + v.y*v.y
 end
 
 function length(v)
