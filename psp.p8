@@ -21,7 +21,11 @@ debuglines = true
 tooltipx = 24
 tooltipy = 3
 
-trajectorypoints = 100
+trajectorypoints = 100 -- number of trajectory points
+
+camadvlim = 55 -- camera advance limit in pixels
+camadvmult = 0.5 -- camera advance velocity multiplier
+camsmooth = 0.15 -- camera smoothing factor (per frame)
 
 -- part graphics
 lines_pod = {
@@ -512,8 +516,13 @@ function _update()
   end
 
   if #focuscraft.parts ~= 0 then
-   cam.x = lerp(cam.x, focuscraft.x - 64, 0.15)
-   cam.y = lerp(cam.y, focuscraft.y - 64, 0.15)
+
+   local advancex = clamp(-camadvlim,camadvlim, focuscraft.v.x) * camadvmult
+   local advancey = clamp(-camadvlim,camadvlim, focuscraft.v.y) * camadvmult
+   local tgtx = focuscraft.x - 64 + advancex
+   local tgty = focuscraft.y - 64 + advancey
+   cam.x = lerp(cam.x, tgtx, camsmooth)
+   cam.y = lerp(cam.y, tgty, camsmooth)
    cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
   end
  else -- mode == 0 build mode
