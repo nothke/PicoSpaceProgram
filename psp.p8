@@ -1200,6 +1200,15 @@ function normalize(v)
  return nv
 end
 
+function normalize100(v)
+ v1 = {x=v.x*0.01,y=v.y*0.01}
+ l = length(v1)
+ nv = {
+  x = (v1.x/l)*100,
+  y = (v1.y/l)*100}
+ return nv
+end
+
 function dot(v1, v2)
  return v1.x * v2.x + v1.y * v2.y
 end
@@ -1231,6 +1240,15 @@ function project(a,b)
  scale = dot(a,b)
  bn = normalize(b)
  return{x=bn.x*scale,y=bn.y*scale}
+end
+
+function project100(a,b)
+ a1 = {x=a.x*0.01,y=a.y*0.01}
+ b1 = {x=b.x*0.01,y=b.y*0.01}
+
+ scale = dot(a1,b1)
+ b1n = normalize(b1)
+ return{x=b1n.x*scale*100,y=b1n.y*scale*100}
 end
 
 function vpset(v, col)
