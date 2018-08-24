@@ -9,7 +9,7 @@ groundy = 120 -- y position of ground
 gravity = 1 -- unused in point gravity
 propoangulardrag = 0
 
-gbody = {x=64, y=150, r=150}
+gbody = {x=64, y=500, r=500}
 gbodysqrc = ((gbody.r)*0.01)*((gbody.r)*0.01)
 
 -- - graphical
@@ -456,6 +456,7 @@ function _update()
 
     if sqrd < sqrc then
      local coldir = normalize(diff)
+     local coldir100=normalize100(diff)
 
      if boomvelocity then
       removepart(craft, part)
@@ -463,28 +464,26 @@ function _update()
       boom(colpos)
       --coldir.y = -3
       response = {x=coldir.x*10, y=coldir.y*10}
-      addforce(craft, colpos, response)
+      -- needs to be converted to 100
+      --addforce(craft, colpos, response)
      else
       --addforce(craft, colpos, coldir)
 
-
-      --craft.v.y = -gravity
-      --craft.v.x *= 0.9 -- friction
-      --local diff = groundy - colpos.y
-      --craft.y += diff
+      -- clamp velocity
+      tangent = right(coldir100)
+      craft.v = project100(craft.v, tangent)
 
       -- friction
-      tangent = right(coldir)
-      craft.v = project(craft.v, tangent)
       --craft.v.x-=tangent.x*tdot*0.01
       --craft.v.y-=tangent.y*tdot*0.01
-
       
 
-      local penetration = (sqrt(sqrc)-sqrt(sqrd))*100 --c-d
-      craft.x += coldir.x*penetration
-      craft.y += coldir.y*penetration
 
+      local penetration = (sqrt(sqrc)-sqrt(sqrd)) --c-d
+      debug(penetration)
+
+      craft.x += coldir100.x*penetration
+      craft.y += coldir100.y*penetration
      end
     end
    end
