@@ -9,7 +9,7 @@ groundy = 120 -- y position of ground
 gravity = 1 -- unused in point gravity
 propoangulardrag = 0
 
-gbody = {x=64, y=500, r=500}
+gbody = {x=64, y=500, r=500, g=100}
 gbodysqrc = ((gbody.r)*0.01)*((gbody.r)*0.01)
 
 -- - graphical
@@ -363,7 +363,7 @@ function _update()
    local bdiff = { x=(craft.x-gbody.x)*0.01, y=(craft.y-gbody.y)*0.01 }
    local bdiffn = normalize(bdiff)
    local sqrmag = sqrlength(bdiff)
-   local gf = 5 / sqrmag
+   local gf = gbody.g / sqrmag
    local gravx = -bdiffn.x *gf
    local gravy = -bdiffn.y *gf
 
@@ -555,7 +555,7 @@ function gforce(pos)
  local bdiff = { x=(pos.x-gbody.x)*0.01, y=(pos.y-gbody.y)*0.01 }
  local bdiffn = normalize(bdiff)
  local sqrmag = sqrlength(bdiff)
- local gf = 5 / sqrmag
+ local gf = gbody.g / sqrmag
  return {x= -bdiffn.x*gf, y=-bdiffn.y*gf}
 end
 
