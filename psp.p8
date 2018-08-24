@@ -3,13 +3,13 @@
 
 -- settings:
 -- - physics
-doground = true
+doground = false
 groundy = 120 -- y position of ground
 
 gravity = 1
 propoangulardrag = 0
 
-gbody = {x=0, y=-100, r=100}
+gbody = {x=64, y=150, r=150}
 
 -- - graphical
 particlespeedmult = 200
@@ -396,6 +396,7 @@ function _update()
    end -- collision
    ]]
 
+   --[[
    for part in all(craft.parts) do
     local colpos = local2worldpartpos(craft, part)
     colpos.y += 5
@@ -414,6 +415,55 @@ function _update()
       craft.v.x *= 0.9 -- friction
       local diff = groundy - colpos.y
       craft.y += diff
+     end
+    end
+   end]]
+
+   boomvelocity = length(craft.v) > 100
+
+   -- body collision
+   for part in all(craft.parts) do
+    local colpos = local2worldpartpos(craft, part)
+    local diff = vdiff(colpos,gbody)
+    local d = length(diff) --sqrdist100(colpos, gbody)
+    local c = gbody.r+3
+
+    local sqrd = sqrdist100(colpos,gbody)
+    local sqrc = ((gbody.r+3)*0.01)*((gbody.r+3)*0.01)
+
+    --debug(sqrd..sqrc)
+
+    if sqrd < sqrc then
+     local coldir = normalize(diff)
+
+     if boomvelocity then
+      removepart(craft, part)
+      centercrafttocom(craft)
+      boom(colpos)
+      --coldir.y = -3
+      response = {x=coldir.x*10, y=coldir.y*10}
+      addforce(craft, colpos, response)
+     else
+      --addforce(craft, colpos, coldir)
+
+
+      --craft.v.y = -gravity
+      --craft.v.x *= 0.9 -- friction
+      --local diff = groundy - colpos.y
+      --craft.y += diff
+
+      -- friction
+      tangent = right(coldir)
+      tdot = dot(craft.v,tangent)
+      --craft.v.x-=tangent.x*tdot*0.01
+      --craft.v.y-=tangent.y*tdot*0.01
+
+      
+
+      local penetration = (sqrt(sqrc)-sqrt(sqrd))*100 --c-d
+      craft.x += coldir.x*penetration
+      craft.y += coldir.y*penetration
+
      end
     end
    end
@@ -451,9 +501,11 @@ function _update()
  end
 
  if (cam.v == nil) cam.v = {x=0,y=0} -- temp solution to prevent error
+ cursor(cam.x,cam.y)
 
  updateparticlesystem(engineparticles)
 
+ debug(focuscraft.numthrusters)
  --cam.x = 0
  --cam.y = 0
 end
@@ -571,6 +623,7 @@ end
 function launch()
  mode = 1
 
+
  for i=1,#focuscraft.parts do
   buildparts[i] = focuscraft.parts[i]
  end  
@@ -643,7 +696,6 @@ function _draw()
  end
 
  -- planet
-
  circfill(gbody.x, gbody.y, gbody.r,2)
  pset(gbody.x, gbody.y, 4)
 
@@ -1124,6 +1176,16 @@ end
 
 function dot(v1, v2)
  return v1.x * v2.x + v1.y * v2.y
+end
+
+function vdiff(v1,v2)
+ return {x=v1.x-v2.x, y=v1.y-v2.y}
+end
+
+function sqrdist100(v1, v2)
+ diffx = (v1.x-v2.x)*0.01
+ diffy = (v1.y-v2.y)*0.01
+ return diffx*diffx + diffy*diffy
 end
 
 function sqrlength(v)
