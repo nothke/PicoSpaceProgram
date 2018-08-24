@@ -958,7 +958,7 @@ function _draw()
 
 
  --print('fpos '..applyforce_pos.x, cam.x + 68, cam.y + 128 - 7, 9)
- pset(applyforce_pos.x, applyforce_pos.y, 14)
+ --pset(applyforce_pos.x, applyforce_pos.y, 14)
 
  drawdebug()
 end
@@ -1311,4 +1311,4 @@ end
 
 --menuitem(1, "fly", launch())
 menuitem(1, "build", build)
-menuitem(2, "toggle symmetry", function() symmetry = not symmetry end)
+--menuitem(2, "toggle symmetry", function() symmetry = not symmetry end)
