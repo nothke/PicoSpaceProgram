@@ -1,16 +1,22 @@
 -- pico space program
 -- by nothke
 
--- settings:
+-- global settings:
 -- - physics
-doground = false -- flat ground
-groundy = 120 -- y position of ground
 
-gravity = 1 -- unused in point gravity
+-- main planet:
+gbody = {x=64, y=500, -- position
+ r=500, -- radius 
+ g=100} -- gravity multiplier
+
+
 propoangulardrag = 0
 
-gbody = {x=64, y=500, r=500, g=100}
-gbodysqrc = ((gbody.r)*0.01)*((gbody.r)*0.01)
+
+-- legacy, flat earth:
+doground = false -- flat ground
+groundy = 120 -- y position of ground
+gravity = 1 -- unused in point gravity
 
 -- - graphical
 particlespeedmult = 200
@@ -26,6 +32,10 @@ trajectorypoints = 100 -- number of trajectory points
 camadvlim = 55 -- camera advance limit in pixels
 camadvmult = 0.5 -- camera advance velocity multiplier
 camsmooth = 0.15 -- camera smoothing factor (per frame)
+
+-----------
+-- parts --
+-----------
 
 -- part graphics
 lines_pod = {
@@ -111,7 +121,7 @@ part_thicc_tank = {
 part_cone = {
  name = "cone",
  lines = lines_cone,
-  mass = 0.4,
+ mass = 0.4,
 }
 
 part_thin_cone = {
@@ -119,7 +129,6 @@ part_thin_cone = {
  lines = lines_thin_cone,
  mass = 0.2,
  fuel = 2,
-
 }
 
 part_engine = {
@@ -156,9 +165,11 @@ partlib = {
 }
 
 -- dont change
+-- constants
 dt = 1/30 -- deltatime
 dt100 = 3.3333 -- dt * 100
 
+-- private vars
 cam = {x=0, y=0}
 crafts = {}
 focuscraft = {}
@@ -166,6 +177,8 @@ buildparts={}
 engineparticles = {}
 
 addforces = {}
+
+gbodysqrc = ((gbody.r)*0.01)*((gbody.r)*0.01)
 
 -- 0 build mode
 -- 1 fly mode
@@ -346,8 +359,6 @@ end
 in_thrt = 0
 in_rot = 0
 in_x = false
-
-hascontrol = true
 
 function _update()
  -- inputs
@@ -557,8 +568,6 @@ function _update()
    cam.y = lerp(cam.y, tgty, camsmooth)
    cam.v = { x = focuscraft.v.x, y = focuscraft.v.y }
   end
- else -- mode == 0 build mode
-  --resetcraft(focuscraft)
  end
 
  if (cam.v == nil) cam.v = {x=0,y=0} -- temp solution to prevent error
@@ -570,7 +579,7 @@ function _update()
  --cam.y = 0
 end
 
-function traj()
+function drawtrajectory()
  local pos = {x=craft.x,y=craft.y}
  local velo = {x=craft.v.x, y=craft.v.y}
  for i=1,trajectorypoints do
@@ -894,7 +903,8 @@ function _draw()
  --else
   --if (uibutton(cam.x + 128-11, cam.y, 10, 10, "build")) build()
  else  --if mode ~= 0 then
-  traj()
+ -- in flight mode
+  drawtrajectory()
 
   if (uibutton(cam.x+128-11, cam.y, 10, 10, "build")) build()
   spr(9,cam.x+128-11+2,cam.y+2)
@@ -918,9 +928,8 @@ function _draw()
 
  -- temp
 
-
-
-
+ --[[
+ -- mouse pull
 
  if click then
   if not lastclicked then
@@ -939,22 +948,13 @@ function _draw()
 
   addforce(focuscraft, fpos, fdir)
  end
-
-
-
- -- debug forces
-  --print('cunt '..#addforces, cam.x + 68, cam.y + 128 - 7, 9)
+ ]]
 
  u = 0
  for k in pairs(addforces) do
 
   af = addforces[k]
   vray(af.pos, af.dirf, 0.1, 9)
-  --vray(af.pos, af.diff, 0.1, 3)
-  --if u == 0 then
-  --print('frce '.. length(af.dirf), cam.x + 68, cam.y + 128 - 7, 9)
-  --end
-  --u+=1
 
   addforces[k] = nil -- remove
  end
