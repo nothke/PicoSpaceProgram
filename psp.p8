@@ -131,6 +131,7 @@ part_pod = {
  name = "crew pod",
  lines = lines_pod,
  mass = 2,
+ control = true
 }
 
 part_rcs = {
@@ -216,7 +217,8 @@ function initcraft()
  mass = 0, -- mass
 
  numthrusters = 0,
- numtanks = 0
+ numtanks = 0,
+ controllable = false,
  } 
 
  add(crafts, craft)
@@ -231,6 +233,7 @@ function clearcraft(craft)
 
  craft.numthrusters = 0
  craft.numtanks = 0
+ craft.controllable = false
 end
 
 function addpart(craft, part, lpos)
@@ -242,6 +245,7 @@ function addpart(craft, part, lpos)
 
  if (part.isthruster) craft.numthrusters += 1
  if (part.fuel ~= nil) craft.numtanks += 1
+ if (part.control) craft.controllable = true
 
  craft.inertia += 1000
  craft.mass += part.mass
@@ -269,7 +273,8 @@ function newpart(pt)
   part.isthruster = pt.isthruster
   part.force = pt.force
  end
- if (pt.fuel ~= nil ) part.fuel = pt.fuel
+ if (pt.fuel ~= nil) part.fuel = pt.fuel
+ if (pt.control ~= nil) part.control = pt.control
  return part
 end
 
@@ -320,15 +325,19 @@ in_thrt = 0
 in_rot = 0
 in_x = false
 
+hascontrol = true
+
 function _update()
  -- inputs
- if (btn(0)) then in_rot = -1
- elseif (btn(1)) then in_rot = 1
- else in_rot = 0 end
-
- if btn(2) then 
-  in_thrt = 1 
-  else in_thrt = 0
+ if mode ~= 0 and focuscraft.controllable then
+  if (btn(0)) then in_rot = -1
+  elseif (btn(1)) then in_rot = 1
+  else in_rot = 0 end
+ 
+  if btn(2) then 
+   in_thrt = 1 
+   else in_thrt = 0
+  end
  end
 
  in_x = btn(4)
@@ -516,7 +525,6 @@ function _update()
 
  updateparticlesystem(engineparticles)
 
- debug(focuscraft.numthrusters)
  --cam.x = 0
  --cam.y = 0
 end
@@ -921,8 +929,8 @@ function _draw()
   line(    cam.x+64-infox, cam.y+64-infoy+8, cam.x+64+infox, cam.y+64-infoy+8,6)
   print("flight results",  cam.x+64-4*7, cam.y+64-infoy+2,6)
   print("outcome: r.u.d",txtx,txty,6) txty+=6
-  print("flight time:",txtx,txty,6) txty+=6
-  print("max height?:",txtx,txty,6) txty+=6
+  print("flight time: 0",txtx,txty,6) txty+=6
+  print("max height: 0",txtx,txty,6) txty+=6
 
   butx = cam.x+64-infox
   buty = cam.y+64+infoy-10
