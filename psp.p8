@@ -809,7 +809,8 @@ function _draw()
 
   -- remove part
   closestpart = getoverlappingpart()
-  if closestpart and deletemode then
+  if closestpart and deletemode 
+  and closestpart.control ~= true then
    p = local2worldpartpos(craft, closestpart)
    line(p.x-5,p.y-5,p.x+5,p.y+5,8)
    line(p.x-5,p.y+5,p.x+5,p.y-5,8)
