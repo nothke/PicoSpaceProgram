@@ -474,7 +474,7 @@ function _update()
     end
    end]]
 
-   boomvelocity = length(craft.v) > 100
+   boomvelocity = length100(craft.v) > 100
 
    -- circular body collision
    for part in all(craft.parts) do
@@ -497,9 +497,10 @@ function _update()
       centercrafttocom(craft)
       boom(colpos)
       --coldir.y = -3
-      response = {x=coldir.x*10, y=coldir.y*10}
+      cdir = normalize2(diff)
+      response = {x=cdir.x*100, y=cdir.y*100}
       -- needs to be converted to 100
-      --addforce(craft, colpos, response)
+      addforce(craft, colpos, response)
      else
       --addforce(craft, colpos, coldir)
 
@@ -1271,6 +1272,14 @@ function normalize(v)
  return nv
 end
 
+function normalize2(v)
+ l = length100(v)
+ nv = {
+  x = v.x/l,
+  y = v.y/l }
+ return nv
+end
+
 function normalize100(v)
  v1 = {x=v.x*0.01,y=v.y*0.01}
  l = length(v1)
@@ -1296,6 +1305,12 @@ end
 
 function sqrlength(v)
  return v.x*v.x + v.y*v.y
+end
+
+function length100(v)
+ local x = v.x*0.01
+ local y = v.y*0.01
+ return (x*x+y*y)*100
 end
 
 function length(v)
