@@ -431,7 +431,7 @@ function _update()
 
    boomvelocity = length(craft.v) > 100
 
-   -- body collision
+   -- circular body collision
    for part in all(craft.parts) do
     local colpos = local2worldpartpos(craft, part)
     local diff = vdiff(colpos,gbody)
@@ -464,7 +464,7 @@ function _update()
 
       -- friction
       tangent = right(coldir)
-      tdot = dot(craft.v,tangent)
+      craft.v = project(craft.v, tangent)
       --craft.v.x-=tangent.x*tdot*0.01
       --craft.v.y-=tangent.y*tdot*0.01
 
@@ -1207,6 +1207,12 @@ end
 function right(v)
  nv = { x = v.y, y=-v.x }
  return nv
+end
+
+function project(a,b)
+ scale = dot(a,b)
+ bn = normalize(b)
+ return{x=bn.x*scale,y=bn.y*scale}
 end
 
 function vpset(v, col)
