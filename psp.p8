@@ -10,6 +10,7 @@ gravity = 1
 propoangulardrag = 0
 
 gbody = {x=64, y=150, r=150}
+gbodysqrc = ((gbody.r)*0.01)*((gbody.r)*0.01)
 
 -- - graphical
 particlespeedmult = 200
@@ -531,6 +532,12 @@ function traj()
   pos.x+=velo.x*dt
   pos.y+=velo.y*dt
   local nextp = {x=pos.x,y=pos.y}
+
+  local sqrd = sqrdist100(nextp,gbody)
+  if sqrd < gbodysqrc then 
+   vpset(nextp,8)
+   break end
+
   vline(lastp,nextp,4)
   --vpset(nextp,7)
  end
