@@ -220,6 +220,7 @@ function initcraft()
  com = {x = 0, y = 0}, -- center of mass
  inertia = 0, -- moment of inertia (angular)
  mass = 0, -- mass
+ fuel = 0, -- total fuel
 
  numthrusters = 0,
  numtanks = 0,
@@ -239,6 +240,7 @@ function clearcraft(craft)
  craft.numthrusters = 0
  craft.numtanks = 0
  craft.controllable = false
+ craft.fuel = 0
 end
 
 function addpart(craft, part, lpos)
@@ -249,7 +251,10 @@ function addpart(craft, part, lpos)
  part.oy = lpos.y
 
  if (part.isthruster) craft.numthrusters += 1
- if (part.fuel ~= nil) craft.numtanks += 1
+ if part.fuel ~= nil then 
+  craft.numtanks += 1
+  craft.fuel += part.fuel
+ end
  if (part.control) craft.controllable = true
 
  craft.inertia += 1000
@@ -260,11 +265,16 @@ end
 
 function removepart(craft, part)
  if (part.isthruster) craft.numthrusters -= 1
- if (part.fuel ~= nil) craft.numtanks -= 1
+ if part.fuel ~= nil then
+  craft.numtanks -= 1
+  craft.fuel -= part.fuel
+ end
+
  if (part.control) craft.controllable = false
 
  craft.inertia -= 1000
  craft.mass -= part.mass
+
 
  del(craft.parts, part)
  updatecom(craft)
@@ -275,11 +285,17 @@ function newpart(pt)
 
  part.lines = pt.lines
  part.mass = pt.mass
+
  if pt.isthruster ~= nil then 
   part.isthruster = pt.isthruster
   part.force = pt.force
  end
- if (pt.fuel ~= nil) part.fuel = pt.fuel
+
+ if pt.fuel ~= nil then 
+  part.fuel = pt.fuel
+  part.fuelcapacity = pt.fuel
+ end
+
  if (pt.control ~= nil) part.control = pt.control
  return part
 end
@@ -378,6 +394,8 @@ function _update()
    -- step velocity
    craft.x += craft.v.x * dt
    craft.y += craft.v.y * dt
+
+   local fueldeplete = 0
  
    -- process thrusters
    if in_thrt > 0 then
@@ -393,10 +411,17 @@ function _update()
        x = craft.f.x * part.force,
        y = craft.f.y * part.force}
       addforce(craft, ppos, f)
+      fueldeplete+=1*dt
      end
     end
    end
- 
+
+   --[[
+   for part in all(craft.parts) then
+    if part.tank ~= nil and part.tank  then
+   ]]
+
+
    --craft.v.x += craft.f.x * in_thrt * 0.2
    --craft.v.y += craft.f.y * in_thrt * 0.2
 
