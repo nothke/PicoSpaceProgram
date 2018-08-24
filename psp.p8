@@ -799,8 +799,9 @@ function _draw()
   elseif hovered > -1 then
    local pt = partlib[hovered+1]
    print(pt.name, tooltipx, tooltipy, 6)
-   if (pt.isthruster) print('thrust force: '..pt.force, tooltipx, tooltipy + 6, 5)
-   if (pt.fuel ~= nil) print('fuel: '..pt.fuel, tooltipx, tooltipy + 6, 5)
+   print('dry mass: '..pt.mass, tooltipx, tooltipy + 6, 5)
+   if (pt.isthruster) print('thrust force: '..pt.force, tooltipx, tooltipy + 13, 5)
+   if (pt.fuel ~= nil) print('fuel: '..pt.fuel, tooltipx, tooltipy + 13, 5)
   end
 
   if rclick and not lastclicked then
