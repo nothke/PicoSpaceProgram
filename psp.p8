@@ -978,8 +978,8 @@ function _draw()
   line(    cam.x+64-infox, cam.y+64-infoy+8, cam.x+64+infox, cam.y+64-infoy+8,6)
   print("flight results",  cam.x+64-4*7, cam.y+64-infoy+2,6)
   print("outcome: r.u.d",txtx,txty,6) txty+=6
-  print("flight time: 0",txtx,txty,6) txty+=6
-  print("max height: 0",txtx,txty,6) txty+=6
+  print("flight time: n/a",txtx,txty,6) txty+=6
+  print("max height: n/a",txtx,txty,6) txty+=6
 
   butx = cam.x+64-infox
   buty = cam.y+64+infoy-10
