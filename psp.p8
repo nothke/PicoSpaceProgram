@@ -185,11 +185,11 @@ function _init()
  craft = initcraft()
  focuscraft = craft
 
+ build()
+
  -- add initial parts here
  part = newpart(part_pod)
  addpart(craft, part, {x = 0, y = 0})
-
- build()
 end
 
 function initcraft()
@@ -220,6 +220,16 @@ function initcraft()
 
  add(crafts, craft)
  return craft
+end
+
+function clearcraft(craft)
+ craft.parts={}
+ craft.inertia = 0
+ craft.mass = 0
+ craft.com={x=0,y=0}
+
+ craft.numthrusters = 0
+ craft.numtanks = 0
 end
 
 function addpart(craft, part, lpos)
@@ -638,13 +648,11 @@ end
 function build()
  mode = 0
 
-  for i=1,#buildparts do
-   focuscraft.parts[i] = buildparts[i]
-  end
+ clearcraft(focuscraft)
 
- for part in all(focuscraft.parts) do
-  part.x = part.ox
-  part.y = part.oy
+ for i=1,#buildparts do
+  pos={x=buildparts[i].ox,y=buildparts[i].oy}
+  addpart(focuscraft, buildparts[i], pos)
  end
 
  resetcraft(focuscraft)
