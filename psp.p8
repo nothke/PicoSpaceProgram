@@ -177,7 +177,7 @@ rclick = false
 onbutton = false
 frameonbutton = false
 
-
+debuglog={}
 
 function _init()
  poke(0x5f2d, 1) -- enable mouse
@@ -883,6 +883,8 @@ function _draw()
 
  --print('fpos '..applyforce_pos.x, cam.x + 68, cam.y + 128 - 7, 9)
  pset(applyforce_pos.x, applyforce_pos.y, 14)
+
+ drawdebug()
 end
 ------------------
 -- end of draw
@@ -1201,6 +1203,18 @@ end
 function printshd(text, x, y, col)
  print(text, x+1, y+1, 0)
  print(text, x, y, col)
+end
+
+function debug(str)
+ add(debuglog,str)
+end
+
+function drawdebug()
+ cursor(cam.x,cam.y)
+ for k in all(debuglog) do
+  print(k)
+  del(debuglog,k)
+ end
 end
 
 --menuitem(1, "fly", launch())
