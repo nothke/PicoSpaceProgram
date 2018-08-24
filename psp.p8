@@ -648,7 +648,7 @@ end
 function launch()
  mode = 1
 
-
+ buildparts={}
  for i=1,#focuscraft.parts do
   buildparts[i] = focuscraft.parts[i]
  end  
@@ -833,8 +833,8 @@ function _draw()
   tooly = 128-15
   if (uibutton(toolx, tooly, 10, 10, "symmetry "..(symmetry and 'on' or 'off'))) symmetry = not symmetry
   spr(3,toolx+2,tooly+2) toolx += 10
-  if  uibutton(toolx, tooly, 10, 10, "rotate") then rotate= (rotate+1)%4 end
-  spr(5,toolx+2,tooly+2) toolx += 10
+  --if  uibutton(toolx, tooly, 10, 10, "rotate") then rotate= (rotate+1)%4 end
+  --spr(5,toolx+2,tooly+2) toolx += 10
   if  uibutton(toolx, tooly, 10, 10, "grid snap "..(gridsnap and 'on' or 'off')) then 
    gridsnap = not gridsnap end
   spr(6,toolx+2,tooly+2) toolx += 10
