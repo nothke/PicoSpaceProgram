@@ -148,8 +148,8 @@ partlib = {
  part_standard_tank,
  part_engine,
  part_cone,
- --part_pod,
- --part_rcs,
+ --part_pod, -- doesnt really work with more than 1
+ --part_rcs, -- no use because you cant rotate
  part_thin_cone,
  part_thin_tank,
  --part_thicc_tank -- a bit too thicc
@@ -176,10 +176,10 @@ rotate = 0
 gridsnap = false
 deletemode = false
 
-mouse = {}
-wmouse = {}
+mouse = {} -- mouse - screen position
+wmouse = {} -- mouse - world positon
 click = false
-rclick = false
+rclick = false -- rmb
 onbutton = false
 frameonbutton = false
 
@@ -224,7 +224,7 @@ function initcraft()
 
  numthrusters = 0,
  numtanks = 0,
- controllable = false,
+ controllable = false, -- if a pod is part of craft it's controllable
  } 
 
  add(crafts, craft)
@@ -1243,25 +1243,6 @@ function drawparticlesline(_ps, _col)
   end
 end
 
-function drawparticlesystemsprite(ps, spritestart, spriteend)
- diff = spriteend - spritestart
- 
- for i=1,#ps,1 do
- --for i=#ps,1,-1 do
-  particle = ps[i]
-
-  lifemult = particle.lifetime / particle.startlife
-
-  spritenum = flr(spriteend - lifemult * diff)
-
-
-  --sspr(spritenum, particle.pos.x - 4, particle.pos.y - 4)
-  y = 56
-  x = flr(diff - lifemult * diff) * 8
-  sspr(x,y,8,8,particle.pos.x - 8,particle.pos.y - 8,16,16, particle.flp)
- end
-end
-
 -- vector stuff
 
 function normalize(v)
@@ -1337,6 +1318,8 @@ function project100(a,b)
  return{x=b1n.x*scale*100,y=b1n.y*scale*100}
 end
 
+-- vector draw
+
 function vpset(v, col)
  pset(v.x, v.y, col)
 end
@@ -1365,33 +1348,7 @@ function clamp(min, max, value)
  return value
 end
 
--- sprite rotation
-function rspr(sx,sy,x,y,a,w)
- local ca,sa=cos(a),sin(a)
- local srcx,srcy,addr,pixel_pair
- local ddx0,ddy0=ca,sa
- local mask=shl(0xfff8,(w-1))
- w*=4
- ca*=w-0.5
- sa*=w-0.5
- local dx0,dy0=sa-ca+w,-ca-sa+w
- w=2*w-1
- for ix=0,w do
-  srcx,srcy=dx0,dy0
-  for iy=0,w do
-   if band(bor(srcx,srcy),mask)==0 then
-    local c=sget(sx+srcx,sy+srcy)
-    sset(x+ix,y+iy,c)
-   else
-    sset(x+ix,y+iy,rspr_clear_col)
-   end
-   srcx-=ddy0
-   srcy+=ddx0
-  end
-  dx0+=ddx0
-  dy0+=ddy0
- end
-end
+-- print helpers
 
 function prints(text, col)
  print(text, cam.x + 10, cam.y + 10, col)
