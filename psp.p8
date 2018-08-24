@@ -508,13 +508,14 @@ function _update()
       craft.v = project100(craft.v, tangent)
 
       -- friction
-      --craft.v.x-=tangent.x*tdot*0.01
-      --craft.v.y-=tangent.y*tdot*0.01
-      
-
+      --tdot = dot(craft.v,tangent)
+      --debug(tdot)
+      --craft.v.x-=tangent.x*tdot*0.1
+      --craft.v.y-=tangent.y*tdot*0.1
+      craft.v.x*=0.95
+      craft.v.y*=0.95
 
       local penetration = (sqrt(sqrc)-sqrt(sqrd)) --c-d
-      debug(penetration)
 
       craft.x += coldir100.x*penetration
       craft.y += coldir100.y*penetration
