@@ -261,6 +261,7 @@ end
 function removepart(craft, part)
  if (part.isthruster) craft.numthrusters -= 1
  if (part.fuel ~= nil) craft.numtanks -= 1
+ if (part.control) craft.controllable = false
 
  craft.inertia -= 1000
  craft.mass -= part.mass
@@ -380,6 +381,10 @@ function _update()
  
    -- process thrusters
    if in_thrt > 0 then
+    if craft.numthrusters > 0 then -- sfx
+     sfx(0,1,0,8)
+    end
+
     for p=1,#craft.parts do
      if craft.parts[p].isthruster then
       local part = craft.parts[p]
@@ -699,6 +704,7 @@ end
 function boom(pos)
  v = { x =0, y = -150 }
  addparticle(engineparticles, 50, pos, v, 500, 10, 20)
+ sfx(2)
 end
 
 lastclicked = false
@@ -781,6 +787,7 @@ function _draw()
     part = newpart(partlib[selected])
     local pos = {x = flr(p.x) - focuscraft.x, y = -flr(p.y) + focuscraft.y}
     addpart(craft, part, pos) -- attach
+    sfx(6)
 
     if symmetry then
      part = newpart(partlib[selected])
@@ -791,8 +798,12 @@ function _draw()
    end
 
    selected = hovered + 1
+   
 
-   if (selected > 0) deletemode = false
+   if selected > 0 then
+    deletemode = false
+    sfx(4)
+   end
   end
 
   if selected > 0 then
@@ -827,6 +838,7 @@ function _draw()
    tooltip("lmb to remove")
    if click and not lastclicked then
     removepart(craft, closestpart)
+    sfx(3)
    end
   end
 
