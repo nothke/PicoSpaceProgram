@@ -1162,26 +1162,51 @@ function updateparticlesystem(ps)
    v = ps[i]
    del(ps, v)
   else
-    vmult = 1 - (0.5 * dt)  -- magic
+   vmult = 1 - (0.5 * dt)  -- magic
 
-    particle.velocity.x *= vmult
-    particle.velocity.y *= vmult
+   particle.velocity.x *= vmult
+   particle.velocity.y *= vmult
 
-    particle.velocity.y += gravity
+   --particle.velocity.y += gravity
 
-    particle.lastpos.x = particle.pos.x
-    particle.lastpos.y = particle.pos.y
+   particle.lastpos.x = particle.pos.x
+   particle.lastpos.y = particle.pos.y
 
-    particle.pos.x += (particle.velocity.x - cam.v.x) * dt
-    particle.pos.y += (particle.velocity.y - cam.v.y) * dt
+   particle.pos.x += (particle.velocity.x - cam.v.x) * dt
+   particle.pos.y += (particle.velocity.y - cam.v.y) * dt
 
-    particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
+   particle.lifetime-=1 * 0.5 -- temp convert to seconds or smth
 
-    if doground and particle.pos.y > groundy then
-     randbounce = 0.2 + rnd(1)
-     particle.velocity.y = -particle.velocity.y * randbounce * 0.3
-     particle.pos.y = groundy
-    end
+   if doground and particle.pos.y > groundy then
+    randbounce = 0.2 + rnd(1)
+    particle.velocity.y = -particle.velocity.y * randbounce * 0.3
+    particle.pos.y = groundy
+   end
+
+   -- circular collision
+   local diff = vdiff(particle.pos,gbody)
+
+   local sqrd = sqrdist100(particle.pos,gbody)
+   local sqrc = (gbody.r*0.01)*(gbody.r*0.01)
+
+   if sqrd < sqrc then
+    local coldir100=normalize100(diff)
+
+    local normdot = dot(particle.velocity, coldir100)
+
+    local tangent = right(coldir100)
+    particle.velocity = project100(particle.velocity, tangent)
+
+    particle.velocity.x+=coldir100.x*normdot*0.005
+    particle.velocity.y+=coldir100.y*normdot*0.005
+    particle.velocity.x*=0.95
+    particle.velocity.y*=0.95
+
+    local penetration = (sqrt(sqrc)-sqrt(sqrd)) --c-d
+
+    particle.pos.x += coldir100.x*penetration
+    particle.pos.y += coldir100.y*penetration
+   end
   end
  end
 end
