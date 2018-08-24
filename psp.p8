@@ -3,10 +3,10 @@
 
 -- settings:
 -- - physics
-doground = false
+doground = false -- flat ground
 groundy = 120 -- y position of ground
 
-gravity = 1
+gravity = 1 -- unused in point gravity
 propoangulardrag = 0
 
 gbody = {x=64, y=150, r=150}
@@ -21,8 +21,7 @@ debuglines = true
 tooltipx = 24
 tooltipy = 3
 
-trajectorypoints = 20
-trajectory = {}
+trajectorypoints = 100
 
 -- part graphics
 lines_pod = {
@@ -36,7 +35,6 @@ lines_pod = {
 }
 
 lines_cone = {
- -- outline
  {x=-4, y=-4}, {x= 0, y= 4},
  {x= 0, y= 4}, {x= 4, y=-4},
  {x= 4, y=-4}, {x=-4, y=-4},
@@ -84,6 +82,7 @@ lines_rcs = {
 }
 
 -- part data
+
 part_standard_tank = {
  name = "standard tank",
  lines = lines_tank,
@@ -140,15 +139,16 @@ part_rcs = {
  mass = 0.1,
 }
 
+-- parts available in build mode
 partlib = {
  part_standard_tank,
  part_engine,
  part_cone,
- part_pod,
- part_rcs,
+ --part_pod,
+ --part_rcs,
  part_thin_cone,
  part_thin_tank,
- part_thicc_tank
+ --part_thicc_tank -- a bit too thicc
 }
 
 -- dont change
@@ -179,6 +179,7 @@ rclick = false
 onbutton = false
 frameonbutton = false
 
+trajectory = {}
 debuglog={}
 
 function _init()
@@ -445,8 +446,8 @@ function _update()
    for part in all(craft.parts) do
     local colpos = local2worldpartpos(craft, part)
     local diff = vdiff(colpos,gbody)
-    local d = length(diff) --sqrdist100(colpos, gbody)
-    local c = gbody.r+3
+    --local d = length(diff)
+    --local c = gbody.r+3
 
     local sqrd = sqrdist100(colpos,gbody)
     local sqrc = ((gbody.r+3)*0.01)*((gbody.r+3)*0.01)
@@ -532,7 +533,7 @@ end
 function traj()
  local pos = {x=craft.x,y=craft.y}
  local velo = {x=craft.v.x, y=craft.v.y}
- for i=1,300 do
+ for i=1,trajectorypoints do
   local lastp = {x=pos.x,y=pos.y}
   local dv = gforce(pos)
   velo.x += dv.x* 0.5
@@ -798,7 +799,7 @@ function _draw()
   elseif hovered > -1 then
    local pt = partlib[hovered+1]
    print(pt.name, tooltipx, tooltipy, 6)
-   if (pt.isthruster) print('thruster', tooltipx, tooltipy + 6, 5)
+   if (pt.isthruster) print('thrust force: '..pt.force, tooltipx, tooltipy + 6, 5)
    if (pt.fuel ~= nil) print('fuel: '..pt.fuel, tooltipx, tooltipy + 6, 5)
   end
 
